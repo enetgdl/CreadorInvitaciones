@@ -79,6 +79,7 @@ class VisualEditorHost {
 
         this.ui.filterBlur = byId('veFilterBlur');
         this.ui.filterGrayscale = byId('veFilterGrayscale');
+        this.ui.mixBlendMode = byId('veMixBlendMode');
 
         this.ui.hide = byId('veHide');
         this.ui.show = byId('veShow');
@@ -252,12 +253,14 @@ class VisualEditorHost {
             if (!this.selectedId) return;
             this.updateDesignElement(this.selectedId, {
                 filterBlur: parseFloat(this.ui.filterBlur.value || '0'),
-                filterGrayscale: parseFloat(this.ui.filterGrayscale.value || '0')
+                filterGrayscale: parseFloat(this.ui.filterGrayscale.value || '0'),
+                mixBlendMode: this.ui.mixBlendMode.value
             }, { sendToIframe: true, historyKey: 'effects' });
         };
 
         this.ui.filterBlur?.addEventListener('input', effectsInput);
         this.ui.filterGrayscale?.addEventListener('input', effectsInput);
+        this.ui.mixBlendMode?.addEventListener('change', effectsInput);
 
         this.ui.hide?.addEventListener('click', () => {
             if (!this.selectedId) return;
@@ -1819,6 +1822,7 @@ class VisualEditorHost {
 
         if (this.ui.filterBlur) this.ui.filterBlur.value = s.filterBlur != null ? String(s.filterBlur) : '0';
         if (this.ui.filterGrayscale) this.ui.filterGrayscale.value = s.filterGrayscale != null ? String(s.filterGrayscale) : '0';
+        if (this.ui.mixBlendMode) this.ui.mixBlendMode.value = s.mixBlendMode || 'normal';
 
         this.updateFillVisibility();
 
@@ -2106,7 +2110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tryInit = () => {
         const editor = window.invitationEditor;
         const iframe = document.getElementById('previewFrame');
-        if (!editor || !iframe) return false;
+        if (!editor || !editor.data || !iframe) return false;
 
         if (!editor.data.designElements) editor.data.designElements = {};
         if (!editor.data.editorSettings) editor.data.editorSettings = { snappingEnabled: true };

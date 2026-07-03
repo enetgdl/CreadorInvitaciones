@@ -10,6 +10,38 @@ class InvitationStorage {
         this.autoSaveDelay = 2000; // 2 segundos
         this.maxImageWidth = 1920; // Ancho máximo para imágenes
         this.imageQuality = 0.8; // Calidad de compresión JPEG
+        this.currentData = null; // Mantiene el estado sincronizado en memoria
+    }
+
+    /**
+     * Inicializa el almacenamiento asíncrono desde IndexedDB o migra desde localStorage
+     */
+    async initialize() {
+        try {
+            // 1. Intentar cargar desde IndexedDB
+            let data = await window.indexedDBManager.get(this.storageKey);
+            
+            // 2. Si no hay datos, revisar localStorage (Migración transparente)
+            if (!data) {
+                const rawLocal = localStorage.getItem(this.storageKey);
+                if (rawLocal) {
+                    console.log('📦 [Storage] Migrando datos legacy de localStorage a IndexedDB...');
+                    data = JSON.parse(rawLocal);
+                    localStorage.removeItem(this.storageKey); // Limpiar legacy
+                }
+            }
+
+            // 3. Setear en memoria y migrar schema si aplica
+            if (data) {
+                this.currentData = this.migrateData(data);
+                await window.indexedDBManager.put(this.storageKey, this.currentData);
+            } else {
+                this.currentData = this.getDefaultData();
+            }
+        } catch (error) {
+            console.error('❌ [Storage] Error fatal en inicialización:', error);
+            this.currentData = this.getDefaultData();
+        }
     }
 
     /**
@@ -81,23 +113,66 @@ class InvitationStorage {
     }
 
     /**
-     * Obtener datos de la invitación actual
+     * Obtener datos de la invitación actual (síncrono desde memoria)
      */
     getData() {
-        try {
-            const data = localStorage.getItem(this.storageKey);
-            return data ? JSON.parse(data) : this.getDefaultData();
-        } catch (error) {
-            console.error('Error al cargar datos:', error);
-            return this.getDefaultData();
+        if (!this.currentData) {
+            console.warn('⚠️ [Storage] getData() llamado antes de la inicialización asíncrona.');
+            this.currentData = this.getDefaultData();
         }
+        return this.currentData;
     }
 
     /**
-     * Datos predeterminados para nueva invitación
+     * Migración automática del schema de datos.
+     * Garantiza que datos de versiones anteriores no rompan el layout actual.
+     */
+    migrateData(data) {
+        const CURRENT_SCHEMA = 2;
+        if (data._schemaVersion >= CURRENT_SCHEMA) return data; // ya actualizado
+
+        console.log(`[Storage] Migrando schema v${data._schemaVersion || 1} → v${CURRENT_SCHEMA}...`);
+
+        // ── Migración v1 → v2 ──
+        // Elementos cuyo tamaño es gestionado por CSS de plantilla.
+        // Se eliminan width/height/tx/ty guardados de sesiones anteriores
+        // para evitar que rompan el flujo flexbox del layout actual.
+        const FLOW_ELEMENTS = new Set([
+            'heroSection', 'contentSection', 'massInfo', 'countdownSection',
+            'rsvpSection', 'mapSection', 'qrSection', 'footerSection', 'confirmSection',
+            'eventDate', 'eventTime', 'eventLocation', 'eventAddress',
+            'massTime', 'massLocation', 'massAddress',
+            'eventDetails', 'eventType', 'eventName', 'honoredName', 'divider',
+            'dressCode', 'mainMessage', 'countdownText', 'countdownDisplay',
+            'rsvpTitle', 'rsvpButton', 'mapTitle', 'closingMessage',
+            'eventHashtag', 'confirmPhone', 'footerText'
+        ]);
+
+        if (data.designElements && typeof data.designElements === 'object') {
+            for (const [id, el] of Object.entries(data.designElements)) {
+                if (!el || typeof el !== 'object') continue;
+                if (FLOW_ELEMENTS.has(id)) {
+                    // Preservar solo propiedades visuales; borrar dimensiones forzadas
+                    delete el.width;
+                    delete el.height;
+                    delete el.tx;
+                    delete el.ty;
+                    delete el.zIndex;
+                }
+            }
+            console.log('[Storage] designElements de elementos de flujo limpiados.');
+        }
+
+        data._schemaVersion = CURRENT_SCHEMA;
+        return data;
+    }
+
+    /**
+     * Datos predeterminados para nueva invitación (Schema v2)
      */
     getDefaultData() {
         return {
+            _schemaVersion: 2,
             // General
             eventType: 'xv',
             eventName: '',
@@ -235,58 +310,24 @@ class InvitationStorage {
     }
 
     /**
-     * Guardar datos de la invitación
+     * Guardar datos de la invitación en IndexedDB
      */
     async saveData(data) {
-        // Mostrar indicador de guardado
         this.showAutosaveIndicator('saving');
         
         try {
             data.lastModified = moment().toISOString();
-            localStorage.setItem(this.storageKey, JSON.stringify(data));
+            this.currentData = data; // Sincronizar memoria
             
-            // Mostrar indicador de éxito
+            // Persistir en IndexedDB
+            await window.indexedDBManager.put(this.storageKey, data);
+            
             this.showAutosaveIndicator('saved');
-            
-            // No mostrar notificación en guardado automático (solo en guardado manual)
             return true;
         } catch (error) {
-            console.error('Error al guardar datos:', error);
-            
-            // Mostrar indicador de error
+            console.error('❌ [Storage] Error al guardar datos:', error);
             this.showAutosaveIndicator('error');
-
-            // Detectar error de cuota excedida
-            if (error.name === 'QuotaExceededError' || error.code === 22) {
-                console.warn('⚠️ Cuota de localStorage excedida, intentando liberar espacio...');
-
-                // Intentar comprimir datos automáticamente
-                const compressionResult = await this.compressDataAutomatically(data);
-                if (compressionResult) {
-                    this.showNotification('Optimizando almacenamiento...', 'warning');
-                    // Reintentar guardar después de comprimir
-                    try {
-                        localStorage.setItem(this.storageKey, JSON.stringify(data));
-                        this.showAutosaveIndicator('saved');
-                        return true;
-                    } catch (retryError) {
-                        console.error('Error incluso después de comprimir:', retryError);
-                        this.showNotification(
-                            'Almacenamiento lleno. Elimina imágenes de la galería.',
-                            'error'
-                        );
-                        return false;
-                    }
-                } else {
-                    this.showNotification(
-                        'Almacenamiento lleno. Elimina elementos multimedia.',
-                        'error'
-                    );
-                    return false;
-                }
-            }
-
-            this.showNotification('Error al guardar', 'error');
+            this.showNotification('Error grave al guardar', 'error');
             return false;
         }
     }
@@ -581,11 +622,12 @@ class InvitationStorage {
     }
 
     /**
-     * Limpiar todos los datos
+     * Limpiar todos los datos (borra de IndexedDB y reseta en memoria)
      */
-    clearData() {
+    async clearData() {
         if (confirm('¿Estás seguro de que deseas eliminar todos los datos?')) {
-            localStorage.removeItem(this.storageKey);
+            await window.indexedDBManager.delete(this.storageKey);
+            this.currentData = this.getDefaultData();
             this.showNotification('Datos eliminados', 'success');
             return true;
         }
@@ -593,11 +635,11 @@ class InvitationStorage {
     }
 
     /**
-     * Exportar datos como JSON
+     * Exportar datos como JSON estandarizado v2.0
      */
     exportJSON() {
-        const data = this.getData();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const schema = this.exportToJSON();
+        const blob = new Blob([JSON.stringify(schema, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -607,16 +649,27 @@ class InvitationStorage {
     }
 
     /**
-     * Importar datos desde JSON
+     * Importar datos desde JSON (detecta schema v2.0 o legacy)
      */
     async importJSON(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
                 try {
-                    const data = JSON.parse(e.target.result);
-                    this.saveData(data);
+                    const parsed = JSON.parse(e.target.result);
+                    let data;
+
+                    if (parsed._version === '2.0.0') {
+                        // Schema moderno
+                        data = this.importFromJSON(parsed);
+                    } else {
+                        // Schema legacy plano: cargar directamente
+                        data = this.migrateData(parsed);
+                        this.currentData = data;
+                    }
+
+                    await this.saveData(data);
                     resolve(data);
                     this.showNotification('Datos importados correctamente', 'success');
                 } catch (error) {
@@ -631,10 +684,10 @@ class InvitationStorage {
     }
 
     /**
-     * Obtener tamaño total de almacenamiento usado
+     * Obtener tamaño estimado del almacenamiento actual (en memoria)
      */
     getStorageSize() {
-        const data = JSON.stringify(localStorage.getItem(this.storageKey));
+        const data = JSON.stringify(this.currentData || {});
         const bytes = new Blob([data]).size;
         const kb = bytes / 1024;
         const mb = kb / 1024;
@@ -689,10 +742,145 @@ class InvitationStorage {
             version: data.version
         };
     }
+    /**
+     * Exporta los datos al esquema JSON estandarizado v2.0 (Separation of Concerns)
+     */
+    exportToJSON() {
+        const data = this.getData();
+        
+        // Extraer Tema (Colores, Fuentes, Efectos Generales)
+        const theme = {
+            id: data.templateMeta?.id || 'custom',
+            name: data.templateMeta?.name || 'Personalizado',
+            tokens: {
+                colors: {
+                    primary: data.primaryColor,
+                    secondary: data.secondaryColor,
+                    text: data.textColor
+                },
+                fonts: {
+                    heading: data.titleFont,
+                    body: data.bodyFont
+                },
+                effects: {
+                    backgroundEffect: data.backgroundEffect,
+                    overlayOpacity: data.overlayOpacity
+                }
+            }
+        };
+
+        // Extraer Contenido (Textos, Fechas, Ubicaciones, Multimedia)
+        const content = {
+            eventType: data.eventType,
+            eventName: data.eventName,
+            honoredName: data.honoredName,
+            eventDate: data.eventDate,
+            eventTime: data.eventTime,
+            eventLocation: data.eventLocation,
+            eventAddress: data.eventAddress,
+            massTime: data.massTime,
+            massLocation: data.massLocation,
+            massAddress: data.massAddress,
+            enableMassLocation: data.enableMassLocation,
+            enableMassTime: data.enableMassTime,
+            enableMassAddress: data.enableMassAddress,
+            welcomeMessage: data.welcomeMessage,
+            mainMessage: data.mainMessage,
+            dressCode: data.dressCode,
+            confirmPhone: data.confirmPhone,
+            closingMessage: data.closingMessage,
+            eventHashtag: data.eventHashtag,
+            assets: {
+                backgroundImage: data.backgroundImage,
+                backgroundVideo: data.backgroundVideo,
+                honoredPhoto: data.honoredPhoto,
+                backgroundMusic: data.backgroundMusic,
+                audioNote: data.audioNote,
+                gallery: data.gallery
+            },
+            interactive: {
+                enableCountdown: data.enableCountdown,
+                countdownText: data.countdownText,
+                enableQR: data.enableQR,
+                qrURL: data.qrURL,
+                enableMap: data.enableMap,
+                mapCoords: data.mapCoords,
+                enableRSVP: data.enableRSVP,
+                rsvpURL: data.rsvpURL
+            }
+        };
+
+        // Extraer Overrides (Ajustes finos del editor visual)
+        const overrides = {
+            designElements: data.designElements || {},
+            elementStyles: data.elementStyles || {},
+            containerStyles: data.containerStyles || {}
+        };
+
+        return {
+            _version: "2.0.0",
+            metadata: {
+                id: data.templateMeta?.id || `inv-${Date.now().toString(36)}`,
+                lastModified: new Date().toISOString()
+            },
+            theme,
+            content,
+            overrides
+        };
+    }
+
+    /**
+     * Importa desde el esquema JSON estandarizado v2.0
+     * @param {Object} schema 
+     */
+    importFromJSON(schema) {
+        if (schema._version !== "2.0.0") {
+            console.warn("[Storage] Importando schema antiguo o versión desconocida:", schema._version);
+            // Lógica de fallback si fuera necesario
+        }
+
+        const data = this.getDefaultData();
+        
+        // Restaurar Tema
+        if (schema.theme && schema.theme.tokens) {
+            data.templateMeta = { id: schema.theme.id, name: schema.theme.name };
+            data.primaryColor = schema.theme.tokens.colors?.primary || data.primaryColor;
+            data.secondaryColor = schema.theme.tokens.colors?.secondary || data.secondaryColor;
+            data.textColor = schema.theme.tokens.colors?.text || data.textColor;
+            data.titleFont = schema.theme.tokens.fonts?.heading || data.titleFont;
+            data.bodyFont = schema.theme.tokens.fonts?.body || data.bodyFont;
+            data.backgroundEffect = schema.theme.tokens.effects?.backgroundEffect || data.backgroundEffect;
+            data.overlayOpacity = schema.theme.tokens.effects?.overlayOpacity ?? data.overlayOpacity;
+        }
+
+        // Restaurar Contenido
+        if (schema.content) {
+            Object.assign(data, schema.content); // Copia las propiedades planas
+            if (schema.content.assets) {
+                Object.assign(data, schema.content.assets);
+            }
+            if (schema.content.interactive) {
+                Object.assign(data, schema.content.interactive);
+            }
+            // Eliminar las keys anidadas que se esparcieron en la raíz
+            delete data.assets;
+            delete data.interactive;
+        }
+
+        // Restaurar Overrides
+        if (schema.overrides) {
+            data.designElements = schema.overrides.designElements || {};
+            data.elementStyles = schema.overrides.elementStyles || {};
+            data.containerStyles = schema.overrides.containerStyles || {};
+        }
+
+        this.currentData = data;
+        return data;
+    }
 }
 
-// Crear instancia global
-const invitationStorage = new InvitationStorage();
+// Instancia global
+window.invitationStorage = new InvitationStorage();
 
 // Agregar estilos de animación para notificaciones
 const style = document.createElement('style');

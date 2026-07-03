@@ -193,21 +193,21 @@ if (typeof InvitationPreview !== 'undefined') {
                         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
                         
                         countdownEl.innerHTML = \`
-                            <div class="countdown-values">
+                            <div class="countdown-display">
                                 <div class="countdown-item">
-                                    <span class="countdown-number">\${days}</span>
+                                    <span class="countdown-value">\${days}</span>
                                     <span class="countdown-label">Días</span>
                                 </div>
                                 <div class="countdown-item">
-                                    <span class="countdown-number">\${hours}</span>
+                                    <span class="countdown-value">\${hours}</span>
                                     <span class="countdown-label">Horas</span>
                                 </div>
                                 <div class="countdown-item">
-                                    <span class="countdown-number">\${minutes}</span>
+                                    <span class="countdown-value">\${minutes}</span>
                                     <span class="countdown-label">Min</span>
                                 </div>
                                 <div class="countdown-item">
-                                    <span class="countdown-number">\${seconds}</span>
+                                    <span class="countdown-value">\${seconds}</span>
                                     <span class="countdown-label">Seg</span>
                                 </div>
                             </div>

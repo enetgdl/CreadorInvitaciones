@@ -1,0 +1,29 @@
+{
+  "theme": {
+    "id": "botanico-verde",
+    "name": "Botánico Verde",
+    "version": 1,
+    "category": "general",
+    "tokens": {
+      "colors": {
+        "primary": "#D4AF37",
+        "secondary": "#F9F6F0",
+        "text": "#2D5016"
+      },
+      "fonts": {
+        "heading": "'Playfair Display', serif",
+        "body": "'Montserrat', sans-serif"
+      },
+      "effects": {
+        "backgroundEffect": "none",
+        "overlayOpacity": 30
+      }
+    },
+    "layout": {
+      "backgroundFill": {
+        "fillType": "gradient",
+        "fillGradient": "linear-gradient(160deg, #1A3009 0%, #2D5016 50%, #0D1F05 100%)"
+      }
+    }
+  }
+}

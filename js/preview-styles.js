@@ -59,19 +59,35 @@ if (typeof InvitationPreview !== 'undefined') {
         const escAttr = (v) => String(v).replace(/"/g, '\\"');
         const escUrl = (v) => String(v).replace(/["\\\n\r]/g, (m) => (m === '"' ? '\\"' : '\\' + m));
 
+        // Elementos cuyo tamaño es gestionado por el flujo CSS (flexbox/grid de la plantilla).
+        // No se les aplican width/height forzados para evitar romper el layout.
+        const FLOW_ELEMENTS = new Set([
+            'heroSection', 'contentSection', 'massInfo', 'countdownSection',
+            'rsvpSection', 'mapSection', 'qrSection', 'footerSection', 'confirmSection',
+            'eventDate', 'eventTime', 'eventLocation', 'eventAddress',
+            'massTime', 'massLocation', 'massAddress',
+            'eventDetails', 'eventType', 'eventName', 'honoredName', 'divider',
+            'dressCode', 'mainMessage', 'countdownText',
+            'rsvpTitle', 'mapTitle', 'closingMessage', 'eventHashtag', 'confirmPhone'
+        ]);
+
         const designElements = data.designElements || {};
         Object.keys(designElements).forEach((id) => {
             const s = designElements[id];
             if (!s) return;
 
             const rules = [];
+            const isFlowElement = FLOW_ELEMENTS.has(id);
 
             const tx = Number.isFinite(parseFloat(s.tx)) ? parseFloat(s.tx) : 0;
             const ty = Number.isFinite(parseFloat(s.ty)) ? parseFloat(s.ty) : 0;
             if (tx !== 0 || ty !== 0) rules.push(`translate: ${tx}px ${ty}px !important;`);
 
-            if (Number.isFinite(parseFloat(s.width))) rules.push(`width: ${parseFloat(s.width)}px !important;`);
-            if (Number.isFinite(parseFloat(s.height))) rules.push(`height: ${parseFloat(s.height)}px !important;`);
+            // Solo aplicar width/height a elementos que NO son de flujo CSS (ej. el fondo, overlays, fotos)
+            if (!isFlowElement) {
+                if (Number.isFinite(parseFloat(s.width))) rules.push(`width: ${parseFloat(s.width)}px !important;`);
+                if (Number.isFinite(parseFloat(s.height))) rules.push(`height: ${parseFloat(s.height)}px !important;`);
+            }
 
             if (Number.isFinite(parseInt(s.zIndex))) {
                 rules.push(`position: relative !important;`);
@@ -132,6 +148,10 @@ if (typeof InvitationPreview !== 'undefined') {
             if (Number.isFinite(parseFloat(s.filterBlur)) && parseFloat(s.filterBlur) > 0) filters.push(`blur(${parseFloat(s.filterBlur)}px)`);
             if (Number.isFinite(parseFloat(s.filterGrayscale)) && parseFloat(s.filterGrayscale) > 0) filters.push(`grayscale(${Math.min(100, Math.max(0, parseFloat(s.filterGrayscale)))}%)`);
             if (filters.length) rules.push(`filter: ${filters.join(' ')} !important;`);
+
+            if (s.mixBlendMode && s.mixBlendMode !== 'normal') {
+                rules.push(`mix-blend-mode: ${s.mixBlendMode} !important;`);
+            }
 
             if (rules.length) css += `[data-editor-id="${escAttr(id)}"] { ${rules.join(' ')} }`;
         });

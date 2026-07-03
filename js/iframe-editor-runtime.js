@@ -522,7 +522,11 @@
 
         const el = pickElementAtPoint(e.clientX, e.clientY);
         if (!el) {
-            if (STATE.selectedId) {
+            const bgEl = document.querySelector('[data-editor-id="background"]');
+            if (bgEl) {
+                selectElement(bgEl);
+                e.preventDefault();
+            } else if (STATE.selectedId) {
                 hideSelection();
                 postToParent({ type: 'clearSelection' });
             }
@@ -542,8 +546,12 @@
         const dy = e.clientY - STATE.drag.startClientY;
 
         if (STATE.drag.mode === 'move') {
-            if (!STATE.drag.moved && (Math.abs(dx) > 2 || Math.abs(dy) > 2)) {
-                STATE.drag.moved = true;
+            if (!STATE.drag.moved) {
+                if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+                    STATE.drag.moved = true;
+                } else {
+                    return; // Prevent micro-movements on click selection
+                }
             }
 
             let nextTx = STATE.drag.startTx + dx;
@@ -719,6 +727,7 @@
         input.style.zIndex = '9999';
         input.style.boxShadow = 'none';
         input.style.overflow = 'hidden';
+        input.style.cursor = 'text';
 
         // Hide original element
         element.style.visibility = 'hidden';
@@ -1374,6 +1383,15 @@
         const style = document.createElement('style');
         style.id = 'editor-selection-styles';
         style.textContent = `
+            body, html {
+                cursor: default !important;
+            }
+            [data-editor-id] {
+                cursor: default !important;
+            }
+            .inline-text-editor {
+                cursor: text !important;
+            }
             .editor-selection-overlay {
                 position: fixed;
                 top: 0;

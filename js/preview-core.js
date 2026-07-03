@@ -24,31 +24,118 @@ class InvitationPreview {
     }
 
     /**
-     * Actualizar vista previa (con debounce)
+     * Actualizar la previsualización de forma inteligente.
+     * Los campos estructurales (texto, toggles, fechas) disparan un render completo (debounced).
+     * Los campos de estilo (color, opacidad, translate...) solo parchean el CSS inline.
+     *
+     * @param {string} field  - Nombre del campo en `data` que cambió
+     * @param {*}      value  - Nuevo valor (ya aplicado a this.currentData antes de llamar)
      */
-    update(field, value) {
-        // Guardar cambio
-        if (this.currentData) {
-            this.currentData[field] = value;
+    smartUpdate(field, value) {
+        // Campos que requieren re-render completo del HTML
+        const STRUCTURE_FIELDS = new Set([
+            'eventType', 'eventName', 'honoredName',
+            'eventDate', 'eventTime', 'eventLocation', 'eventAddress',
+            'massTime', 'massLocation', 'massAddress',
+            'enableMassLocation', 'enableMassTime', 'enableMassAddress',
+            'enableCountdown', 'enableRSVP', 'enableMap', 'enableQR',
+            'welcomeMessage', 'mainMessage', 'dressCode', 'closingMessage',
+            'countdownText', 'eventHashtag', 'confirmPhone',
+            'honoredPhoto', 'backgroundImage', 'backgroundVideo',
+            'backgroundMusic', 'audioNote', 'autoplayMusic', 'loopMusic',
+            'backgroundEffect', 'gallery', '_themeId'
+        ]);
+
+        if (field !== undefined) {
+            // Aplicar el valor al currentData antes de decidir la estrategia
+            if (field.includes('.')) {
+                // Soporte para rutas profundas como 'gallery.enabled'
+                const parts = field.split('.');
+                let obj = this.currentData;
+                for (let i = 0; i < parts.length - 1; i++) obj = obj?.[parts[i]];
+                if (obj) obj[parts[parts.length - 1]] = value;
+            } else {
+                if (this.currentData) this.currentData[field] = value;
+            }
         }
 
-        // Debounce para evitar actualizaciones excesivas
-        clearTimeout(this.debounceTimer);
-        this.debounceTimer = setTimeout(() => {
-            this.render();
-        }, this.debounceDelay);
+        if (STRUCTURE_FIELDS.has(field)) {
+            // Re-render completo con debounce
+            clearTimeout(this.debounceTimer);
+            this.debounceTimer = setTimeout(() => this.render(), this.debounceDelay);
+        } else {
+            // Solo parchear el CSS dinámico — instantáneo, sin destruir el DOM
+            this.patchStyles();
+        }
     }
 
     /**
-     * Actualizar múltiples campos
+     * Actualizar un campo individual (alias de smartUpdate para compatibilidad)
+     */
+    update(field, value) {
+        this.smartUpdate(field, value);
+    }
+
+    /**
+     * Actualizar múltiples campos a la vez.
+     * Si alguno es estructural, se hace un render completo; si no, solo parcheo de CSS.
      */
     updateMultiple(updates) {
+        const STRUCTURE_FIELDS = new Set([
+            'eventType', 'eventName', 'honoredName',
+            'eventDate', 'eventTime', 'eventLocation', 'eventAddress',
+            'massTime', 'massLocation', 'massAddress',
+            'enableMassLocation', 'enableMassTime', 'enableMassAddress',
+            'enableCountdown', 'enableRSVP', 'enableMap', 'enableQR',
+            'welcomeMessage', 'mainMessage', 'dressCode', 'closingMessage',
+            'countdownText', 'eventHashtag', 'confirmPhone',
+            'honoredPhoto', 'backgroundImage', 'backgroundVideo',
+            'backgroundMusic', 'audioNote', 'autoplayMusic', 'loopMusic',
+            'backgroundEffect', 'gallery', '_themeId'
+        ]);
+
         Object.assign(this.currentData, updates);
 
+        const needsFullRender = Object.keys(updates).some(k => STRUCTURE_FIELDS.has(k));
+
         clearTimeout(this.debounceTimer);
-        this.debounceTimer = setTimeout(() => {
-            this.render();
-        }, this.debounceDelay);
+        if (needsFullRender) {
+            this.debounceTimer = setTimeout(() => this.render(), this.debounceDelay);
+        } else {
+            this.patchStyles();
+        }
+    }
+
+    /**
+     * Parchar SOLO el bloque de estilos dinámicos dentro del iframe.
+     * No toca el HTML, no reinicia el countdown, no reparpadea imágenes.
+     * Se usa para: colores, fuentes, opacidades, posiciones (designElements), bordes.
+     */
+    patchStyles() {
+        try {
+            const doc = this.iframe?.contentDocument;
+            if (!doc || !doc.head) return;
+
+            let styleEl = doc.getElementById('__dynamic_styles__');
+            if (!styleEl) {
+                styleEl = doc.createElement('style');
+                styleEl.id = '__dynamic_styles__';
+                doc.head.appendChild(styleEl);
+            }
+
+            // Reutilizar la instancia de InvitationPreview para generar los estilos
+            styleEl.textContent = this.generateAdvancedStyles(this.currentData);
+        } catch (e) {
+            // Si el iframe aún no está listo, simplemente ignorar
+        }
+    }
+
+    /**
+     * Forzar re-render completo desde fuera (ej. al cargar plantilla o cambiar tema)
+     */
+    forceRender() {
+        clearTimeout(this.debounceTimer);
+        this.render();
     }
 
     /**
@@ -165,6 +252,34 @@ class InvitationPreview {
             --text-color: ${data.textColor || '#333333'};
             --title-font: ${data.titleFont || "'Great Vibes', cursive"};
             --body-font: ${data.bodyFont || "'Montserrat', sans-serif"};
+        }
+        
+        /* Sistema de Animaciones al Scroll (Intersection Observer) */
+        [data-animate] {
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        [data-animate].is-visible {
+            opacity: 1;
+        }
+        
+        [data-animate="fade-up"].is-visible {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        [data-animate="fade-in"].is-visible {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        [data-animate="zoom-in"].is-visible {
+            animation: zoomIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }`;
 
         // Estilos base de la invitación
@@ -255,60 +370,91 @@ class InvitationPreview {
 
         /* Content Section */
         .content-section {
-            text-align: center; padding: 1.5rem 1rem;
-            animation: fadeInUp 1s ease-out 0.5s both;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .event-date {
-            font-size: 1.3rem; color: var(--primary); margin: 0.5rem 0;
-            font-weight: 600; letter-spacing: 1px;
+
+        /* Event details grid */
+        .event-details {
+            display: flex; flex-direction: column; gap: 1rem;
         }
-        .event-time {
-            font-size: 1.1rem; color: var(--text-color); margin: 0.3rem 0;
+        .detail-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.875rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
-        .event-location {
-            font-size: 1rem; color: var(--text-color); margin: 0.3rem 0;
-            font-style: italic;
+        .detail-item:hover {
+            background: rgba(255, 255, 255, 0.85);
+            transform: translateX(4px);
         }
-        .event-address {
-            font-size: 0.9rem; color: var(--text-color); margin: 0.3rem 0;
-            opacity: 0.8;
+        .detail-icon {
+            font-size: 1.8rem; min-width: 44px; text-align: center;
         }
+        .detail-content h3 {
+            font-size: 0.72rem; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--primary);
+            margin: 0 0 0.2rem;
+        }
+        .detail-content p {
+            font-size: 0.95rem; font-weight: 600;
+            color: var(--text-color); margin: 0;
+            line-height: 1.4;
+        }
+        .event-date { font-size: 1rem; font-weight: 700; color: var(--primary); }
+        .event-time { font-size: 0.95rem; }
+        .event-location { font-size: 0.95rem; }
+        .event-address { font-size: 0.9rem; white-space: pre-line; }
         .main-message {
-            font-size: 1rem; color: var(--text-color); margin: 1.5rem auto;
-            max-width: 500px; line-height: 1.6; padding: 1rem;
-            background: rgba(255,255,255,0.1); border-radius: 12px;
-            backdrop-filter: blur(10px);
+            font-size: 1rem; color: var(--text-color); margin: 1rem 0;
+            line-height: 1.6; text-align: center;
         }
 
         /* Countdown Section */
         .countdown-section {
-            text-align: center; padding: 1.5rem 1rem;
-            animation: fadeInUp 1s ease-out 0.7s both;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            margin: 1.5rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
         .countdown-title {
-            font-family: var(--title-font); font-size: 1.5rem;
-            color: var(--primary); margin-bottom: 1rem;
+            font-family: var(--title-font); font-size: 1.2rem;
+            color: rgba(0,0,0,0.7); margin-bottom: 1.5rem; font-weight: 600;
         }
-        .countdown-values {
+        /* Classes used by preview-effects.js */
+        .countdown-display {
             display: flex; justify-content: center; gap: 1rem;
             flex-wrap: wrap;
         }
         .countdown-item {
             display: flex; flex-direction: column; align-items: center;
-            min-width: 70px;
+            background: rgba(255,255,255,0.9);
+            padding: 0.8rem 1.2rem; border-radius: 12px;
+            min-width: 70px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
         }
-        .countdown-number {
-            font-size: 2.5rem; font-weight: 700; color: var(--primary);
-            line-height: 1; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        .countdown-value {
+            font-size: 2rem; font-weight: 800;
+            color: var(--primary); line-height: 1.1;
         }
         .countdown-label {
-            font-size: 0.8rem; color: var(--text-color);
-            text-transform: uppercase; letter-spacing: 1px; margin-top: 0.3rem;
+            font-size: 0.7rem; color: var(--text-color);
+            text-transform: uppercase; letter-spacing: 1px; margin-top: 0.3rem; opacity: 0.8;
         }
+        /* Legacy class aliases */
+        .countdown-values { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .countdown-number { font-size: 2rem; font-weight: 800; color: var(--primary); }
         .countdown-error, .countdown-finished {
             font-size: 1rem; color: var(--primary); font-style: italic;
         }
@@ -379,7 +525,6 @@ class InvitationPreview {
         /* RSVP Section */
         .rsvp-section {
             text-align: center; padding: 2rem 1rem;
-            animation: fadeInUp 1s ease-out 0.9s both;
         }
         .rsvp-title {
             font-family: var(--title-font); font-size: 1.5rem;
@@ -402,7 +547,6 @@ class InvitationPreview {
         /* Map Section */
         .map-section {
             text-align: center; padding: 1.5rem 1rem;
-            animation: fadeInUp 1s ease-out 1s both;
         }
         .map-title {
             font-family: var(--title-font); font-size: 1.3rem;
@@ -420,7 +564,6 @@ class InvitationPreview {
         /* QR Section */
         .qr-section {
             text-align: center; padding: 1.5rem 1rem;
-            animation: fadeInUp 1s ease-out 1.1s both;
         }
         .qr-title {
             font-family: var(--title-font); font-size: 1.3rem;
@@ -435,7 +578,6 @@ class InvitationPreview {
         /* Footer */
         .footer-section {
             text-align: center; padding: 2rem 1rem;
-            animation: fadeInUp 1s ease-out 1.2s both;
         }
         .closing-message {
             font-family: var(--title-font); font-size: 1.3rem;
@@ -507,7 +649,7 @@ class InvitationPreview {
         html += '<div class="invitation-container">';
 
         // === FONDO ===
-        html += '<div class="invitation-background">';
+        html += '<div class="invitation-background" data-editor-id="background" data-editor-name="Fondo">';
         if (data.backgroundType === 'video' && data.backgroundVideo) {
             html += `<video class="bg-video" autoplay muted loop playsinline><source src="${data.backgroundVideo}" type="video/mp4"></video>`;
         } else if (data.backgroundType === 'image' && data.backgroundImage) {
@@ -520,8 +662,8 @@ class InvitationPreview {
         // === CONTENIDO ===
         html += '<div class="invitation-content">';
 
-        // --- HERO / PORTADA ---
-        html += '<section class="hero-section" data-editor-id="heroSection" data-editor-name="Portada">';
+        // --- HERO SECTION ---
+        html += '<section class="hero-section" data-editor-id="heroSection" data-editor-name="Seccion Principal" data-animate="fade-in">';
         if (data.eventType) {
             const eventLabels = {
                 xv: 'XV Años', boda: 'Bautizo', bautizo: 'Boda',
@@ -542,58 +684,123 @@ class InvitationPreview {
         if (data.honoredName) {
             html += `<div class="honored-name" data-editor-id="honoredName" data-editor-name="Nombre de Honrada">${esc(data.honoredName)}</div>`;
         }
+        
+        html += '<div class="divider" data-editor-id="divider"></div>';
+        
         html += '</section>';
 
-        // --- CONTENIDO / DETALLES ---
-        html += '<section class="content-section" data-editor-id="contentSection" data-editor-name="Detalles del Evento">';
-        if (data.eventDate) {
-            try {
-                const parts = data.eventDate.split('-');
-                const dateObj = new Date(data.eventDate + 'T12:00:00');
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                html += `<div class="event-date" data-editor-id="eventDate" data-editor-name="Fecha">${dateObj.toLocaleDateString('es-MX', options)}</div>`;
-            } catch (e) {
-                html += `<div class="event-date" data-editor-id="eventDate" data-editor-name="Fecha">${esc(data.eventDate)}</div>`;
-            }
-        }
-        if (data.eventTime) {
-            html += `<div class="event-time" data-editor-id="eventTime" data-editor-name="Hora">${esc(data.eventTime)} hrs</div>`;
-        }
-        if (data.eventLocation) {
-            html += `<div class="event-location" data-editor-id="eventLocation" data-editor-name="Lugar">${esc(data.eventLocation)}</div>`;
-        }
-        if (data.eventAddress) {
-            html += `<div class="event-address" data-editor-id="eventAddress" data-editor-name="Direccion">${esc(data.eventAddress)}</div>`;
-        }
+        // --- CONTENT SECTION ---
+        html += '<section class="content-section" data-editor-id="contentSection" data-editor-name="Seccion de Contenido" data-animate="fade-up">';
+        
         if (data.mainMessage) {
-            html += `<div class="main-message" data-editor-id="mainMessage" data-editor-name="Mensaje Principal">${esc(data.mainMessage)}</div>`;
+            html += `<div class="main-message section-text" data-editor-id="mainMessage" data-editor-name="Mensaje Principal" style="margin-bottom: 1.5rem; text-align: center;">${esc(data.mainMessage)}</div>`;
         }
+        
+        html += '<div class="event-details" data-editor-id="eventDetails">';
+        
+        // Fecha del evento
+        if (data.eventDate) {
+            let formattedDate = esc(data.eventDate);
+            try {
+                const dateObj = new Date(data.eventDate + 'T12:00:00');
+                if (!isNaN(dateObj.getTime())) {
+                    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                    formattedDate = dateObj.toLocaleDateString('es-MX', options);
+                }
+            } catch (e) {}
+            
+            html += `<div class="detail-item" data-editor-id="eventDate" data-editor-name="Fecha">
+                <div class="detail-icon">📅</div>
+                <div class="detail-content">
+                    <h3>Fecha</h3>
+                    <p class="event-date">${formattedDate}</p>
+                </div>
+            </div>`;
+        }
+        
+        // Hora del evento
+        if (data.eventTime) {
+            html += `<div class="detail-item" data-editor-id="eventTime" data-editor-name="Hora">
+                <div class="detail-icon">🕐</div>
+                <div class="detail-content">
+                    <h3>Hora</h3>
+                    <p class="event-time">${esc(data.eventTime)} hrs</p>
+                </div>
+            </div>`;
+        }
+        
+        // Lugar del evento
+        if (data.eventLocation) {
+            html += `<div class="detail-item" data-editor-id="eventLocation" data-editor-name="Lugar">
+                <div class="detail-icon">📍</div>
+                <div class="detail-content">
+                    <h3>Lugar</h3>
+                    <p class="event-location">${esc(data.eventLocation)}</p>
+                </div>
+            </div>`;
+        }
+        
+        // Dirección del evento
+        if (data.eventAddress) {
+            html += `<div class="detail-item" data-editor-id="eventAddress" data-editor-name="Dirección">
+                <div class="detail-icon">🏠</div>
+                <div class="detail-content">
+                    <h3>Dirección</h3>
+                    <p class="event-address">${esc(data.eventAddress)}</p>
+                </div>
+            </div>`;
+        }
+        
+        // === CAMPOS DE MISA / CEREMONIA (dentro de la misma tarjeta) ===
+        if (data.enableMassTime !== false && data.massTime) {
+            html += `<div class="detail-item" data-editor-id="massTime" data-editor-name="Hora Ceremonia">
+                <div class="detail-icon">🔔</div>
+                <div class="detail-content">
+                    <h3>Hora Ceremonia</h3>
+                    <p class="mass-time">${esc(data.massTime)} hrs</p>
+                </div>
+            </div>`;
+        }
+        
+        if (data.enableMassLocation !== false && data.massLocation) {
+            html += `<div class="detail-item" data-editor-id="massLocation" data-editor-name="Lugar Ceremonia">
+                <div class="detail-icon">📍</div>
+                <div class="detail-content">
+                    <h3>Lugar Ceremonia</h3>
+                    <p class="mass-location">${esc(data.massLocation)}</p>
+                </div>
+            </div>`;
+        }
+        
+        if (data.enableMassAddress !== false && data.massAddress) {
+            html += `<div class="detail-item" data-editor-id="massAddress" data-editor-name="Dirección Templo">
+                <div class="detail-icon">⛪</div>
+                <div class="detail-content">
+                    <h3>Dirección Templo</h3>
+                    <p class="mass-address">${esc(data.massAddress)}</p>
+                </div>
+            </div>`;
+        }
+        
+        // Código de vestimenta (como detail-item con ícono 👔)
         if (data.dressCode) {
-            html += `<div class="dress-code" data-editor-id="dressCode" data-editor-name="Codigo de Vestimenta">Codigo de vestimenta: ${esc(data.dressCode)}</div>`;
+            html += `<div class="detail-item" data-editor-id="dressCode" data-editor-name="Código de Vestimenta">
+                <div class="detail-icon">👔</div>
+                <div class="detail-content">
+                    <h3>Código de Vestimenta</h3>
+                    <p class="dress-code">${esc(data.dressCode)}</p>
+                </div>
+            </div>`;
         }
-        html += '</section>';
-
-        // --- INFO DE MISA (si aplica) ---
-        const hasMass = data.enableMassLocation || data.enableMassTime || data.enableMassAddress;
-        if (hasMass && (data.massLocation || data.massTime || data.massAddress)) {
-            html += '<section class="content-section mass-info" data-editor-id="massInfo" data-editor-name="Info Misa">';
-            if (data.enableMassLocation && data.massLocation) {
-                html += `<div>Misa en: ${esc(data.massLocation)}</div>`;
-            }
-            if (data.enableMassTime && data.massTime) {
-                html += `<div>Hora: ${esc(data.massTime)}</div>`;
-            }
-            if (data.enableMassAddress && data.massAddress) {
-                html += `<div>Direccion: ${esc(data.massAddress)}</div>`;
-            }
-            html += '</section>';
-        }
+        
+        html += '</div>'; // .event-details
+        html += '</section>'; // .content-section
 
         // --- CUENTA REGRESIVA ---
         if (data.enableCountdown) {
-            html += '<section class="countdown-section" data-editor-id="countdownSection" data-editor-name="Cuenta Regresiva">';
-            html += `<div class="countdown-title" data-editor-id="countdownText" data-editor-name="Texto Cuenta Regresiva">${esc(data.countdownText || 'Faltan para el gran dia:')}</div>`;
-            html += '<div id="countdown" class="countdown-values"></div>';
+            html += '<section class="countdown-section" data-editor-id="countdownSection" data-editor-name="Cuenta Regresiva" data-animate="zoom-in">';
+            html += `<div class="countdown-title" data-editor-id="countdownText" data-editor-name="Texto Cuenta Regresiva">${esc(data.countdownText || 'Faltan para el gran día:')}</div>`;
+            html += '<div id="countdown" class="countdown-display"></div>';
             html += '</section>';
         }
 
@@ -604,15 +811,15 @@ class InvitationPreview {
 
         // --- RSVP ---
         if (data.enableRSVP && data.rsvpURL) {
-            html += '<section class="rsvp-section" data-editor-id="rsvpSection" data-editor-name="RSVP">';
+            html += '<section class="rsvp-section" data-editor-id="rsvpSection" data-editor-name="RSVP" data-animate="fade-up">';
             html += `<div class="rsvp-title" data-editor-id="rsvpTitle" data-editor-name="Titulo RSVP">Confirma tu asistencia</div>`;
-            html += `<a class="rsvp-button" href="${Sanitize.sanitizeUrl(data.rsvpURL)}" target="_blank" data-editor-id="rsvpButton" data-editor-name="Boton RSVP">RSVP</a>`;
+            html += `<a class="rsvp-btn" href="${Sanitize.sanitizeUrl(data.rsvpURL)}" target="_blank" data-editor-id="rsvpButton" data-editor-name="Boton RSVP">RSVP</a>`;
             html += '</section>';
         }
 
         // --- MAPA ---
         if (data.enableMap && data.mapCoords) {
-            html += '<section class="map-section" data-editor-id="mapSection" data-editor-name="Mapa">';
+            html += '<section class="map-section" data-editor-id="mapSection" data-editor-name="Mapa" data-animate="fade-up">';
             html += `<div class="map-title" data-editor-id="mapTitle" data-editor-name="Titulo Mapa">Ubicacion</div>`;
             html += '<div class="map-container">';
             html += `<iframe src="https://maps.google.com/maps?q=${Sanitize.sanitizeCoords(data.mapCoords)}&t=&z=15&ie=UTF8&iwloc=&output=embed" allowfullscreen loading="lazy"></iframe>`;
@@ -622,7 +829,7 @@ class InvitationPreview {
 
         // --- QR ---
         if (data.enableQR && data.qrURL) {
-            html += '<section class="qr-section" data-editor-id="qrSection" data-editor-name="Codigo QR">';
+            html += '<section class="qr-section" data-editor-id="qrSection" data-editor-name="Codigo QR" data-animate="fade-up">';
             html += `<div class="qr-title">Escanea el codigo QR</div>`;
             html += '<div class="qr-container">';
             html += `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data.qrURL)}" alt="QR Code">`;
@@ -632,7 +839,7 @@ class InvitationPreview {
 
         // --- PIE DE PAGINA ---
         if (data.closingMessage || data.eventHashtag) {
-            html += '<section class="footer-section" data-editor-id="footerSection" data-editor-name="Pie de Pagina">';
+            html += '<section class="footer-section" data-editor-id="footerSection" data-editor-name="Pie de Pagina" data-animate="fade-in">';
             if (data.closingMessage) {
                 html += `<div class="closing-message" data-editor-id="closingMessage" data-editor-name="Mensaje de Cierre">${esc(data.closingMessage)}</div>`;
             }
@@ -644,7 +851,7 @@ class InvitationPreview {
 
         // --- CONFIRMAR ASISTENCIA ---
         if (data.confirmPhone) {
-            html += '<section class="confirm-section" data-editor-id="confirmSection" data-editor-name="Confirmacion">';
+            html += '<section class="confirm-section" data-editor-id="confirmSection" data-editor-name="Confirmacion" data-animate="fade-in">';
             html += `<div class="confirm-phone">Confirma al ${esc(data.confirmPhone)}</div>`;
             html += '</section>';
         }
@@ -657,11 +864,27 @@ class InvitationPreview {
 
     /**
      * Generar scripts de la invitación
-     * Compone todos los scripts: countdown, carrusel, efectos de fondo, musica
+     * Compone todos los scripts: countdown, carrusel, efectos de fondo, musica, e intersection observer
      */
     generateScript() {
         const data = this.currentData;
         let script = '';
+        
+        // Intersection Observer (Scroll Animations)
+        script += `
+            (function() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            // Si solo queremos que anime una vez: observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+                
+                document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
+            })();
+        `;
 
         // Countdown
         if (data.enableCountdown) {

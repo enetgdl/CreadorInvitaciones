@@ -360,6 +360,10 @@
                     <span class="tab-icon">⚙️</span>
                     General
                 </button>
+                <button class="tab-btn" data-tab="templates">
+                    <span class="tab-icon">🎨</span>
+                    Plantillas
+                </button>
                 <button class="tab-btn" data-tab="gallery">
                     <span class="tab-icon">📷</span>
                     Galería
@@ -514,6 +518,18 @@
                             <!-- Personalizado -->
                             <div class="theme-color-option theme-custom-option" title="Personalizado">
                                 <input type="color" class="theme-custom-input" id="customThemeInput">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Plantillas -->
+                <div class="tab-panel" id="templates-panel">
+                    <div class="design-section">
+                        <h3 class="design-section-title">🎨 Plantillas Rápidas</h3>
+                        <div class="design-section-content">
+                            <div class="templates-grid" id="templatesGrid">
+                                <div style="padding: 10px; color: #888; text-align: center;">Cargando plantillas...</div>
                             </div>
                         </div>
                     </div>
@@ -978,11 +994,31 @@
 
                         <div class="control-group">
                             <label class="control-label">Efectos</label>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                                 <input type="number" id="veFilterBlur" class="control-input" step="1" min="0" value="0"
                                     placeholder="Blur px">
                                 <input type="number" id="veFilterGrayscale" class="control-input" step="1" min="0"
-                                    max="100" value="0" placeholder="Grayscale %">
+                                    max="100" value="0" placeholder="Grayscl %">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                                <select id="veMixBlendMode" class="control-input">
+                                    <option value="normal">Normal</option>
+                                    <option value="multiply">Multiplicar</option>
+                                    <option value="screen">Trama (Screen)</option>
+                                    <option value="overlay">Superponer</option>
+                                    <option value="darken">Oscurecer</option>
+                                    <option value="lighten">Aclarar</option>
+                                    <option value="color-dodge">Sobreexponer</option>
+                                    <option value="color-burn">Subexponer</option>
+                                    <option value="hard-light">Luz Fuerte</option>
+                                    <option value="soft-light">Luz Suave</option>
+                                    <option value="difference">Diferencia</option>
+                                    <option value="exclusion">Exclusión</option>
+                                    <option value="hue">Tono</option>
+                                    <option value="saturation">Saturación</option>
+                                    <option value="color">Color</option>
+                                    <option value="luminosity">Luminosidad</option>
+                                </select>
                             </div>
                         </div>
 
@@ -1503,18 +1539,19 @@
             <div id="historyList" class="history-list" role="list" aria-label="Lista de acciones"></div>
         </div>
     </div>
-
+    
     <!-- Scripts -->
+    <!-- Security: Sanitization module (must load before other scripts) -->
+    <script src="js/sanitize.js"></script>
+    <!-- Utility functions (must load before other scripts) -->
+    <script src="js/utils.js"></script>
     <script src="js/moment.min.js"></script>
     <script>if (window.moment) moment.locale('es');</script>
     <script src="js/image-optimizer.js"></script>
     <script src="js/media-persistence-manager.js"></script>
     <script src="js/rsvp-help-modal.js"></script>
     <script src="js/responsive-centering-manager.js"></script>
-    <!-- Security: Sanitization module (must load before other scripts) -->
-    <script src="js/sanitize.js"></script>
-    <!-- Utility functions (must load before other scripts) -->
-    <script src="js/utils.js"></script>
+    <script src="js/indexeddb-manager.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/history-dropdown.js"></script>
     <script src="js/history-manager.js"></script>
@@ -1534,14 +1571,6 @@
     <script src="js/tests/accordion-navigation-test.js"></script>
     <script src="js/tests/accordion-accessibility-enhanced-test.js"></script>
     <script src="js/tests/accordion-redesign-test.js"></script>
-    <!-- Layer Manager System (Legacy - Replaced by Visual Editor) -->
-    <!-- <script src="js/layer-store.js"></script>
-    <script src="js/layer-sync.js"></script>
-    <script src="js/layer-manager.js"></script> -->
-    <!-- Enhanced Realtime Layer Sync System (Legacy - Replaced by Visual Editor) -->
-    <!-- <script src="js/enhanced-layer-realtime-sync.js"></script> -->
-    <!-- <script src="js/tests/layer-manager-test.js"></script>
-    <script src="js/tests/enhanced-layer-sync-test.js"></script> -->
     <script src="js/tests/media-delete-test.js"></script>
     <script src="js/tests/rsvp-help-modal-test.js"></script>
     <script src="js/tests/conditional-visibility-test.js"></script>
@@ -1590,6 +1619,8 @@
     <script src="js/editor.js"></script>
     <script src="js/visual-editor.js"></script>
     <script src="js/template-manager.js"></script>
+    <script src="js/preset-engine.js"></script>
+    <script src="js/preset-dock.js"></script>
     <script src="js/top-menu.js"></script>
     <!-- Script para ajuste automático de vista previa -->
     <script>

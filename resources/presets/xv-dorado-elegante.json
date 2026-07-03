@@ -1,0 +1,29 @@
+{
+  "theme": {
+    "id": "xv-dorado-elegante",
+    "name": "XV Dorado Elegante",
+    "version": 1,
+    "category": "xv",
+    "tokens": {
+      "colors": {
+        "primary": "#B8860B",
+        "secondary": "#FFF8DC",
+        "text": "#4A3728"
+      },
+      "fonts": {
+        "heading": "'Great Vibes', cursive",
+        "body": "'Cormorant Garamond', serif"
+      },
+      "effects": {
+        "backgroundEffect": "particles",
+        "overlayOpacity": 25
+      }
+    },
+    "layout": {
+      "backgroundFill": {
+        "fillType": "gradient",
+        "fillGradient": "linear-gradient(160deg, #2C1A0E 0%, #4A3728 40%, #1A0F08 100%)"
+      }
+    }
+  }
+}

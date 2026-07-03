@@ -18,7 +18,10 @@ class InvitationEditor {
     /**
      * Inicializar cuando el DOM esté listo
      */
-    initialize() {
+    async initialize() {
+        // Inicializar el almacenamiento asíncrono (IndexedDB)
+        await this.storage.initialize();
+
         // Inyectar estilos de validación
         this.addValidationStyles();
 
@@ -27,12 +30,27 @@ class InvitationEditor {
 
         // Verificar si hay datos guardados y mostrar diálogo de inicio
         const savedData = this.storage.getData();
-        const hasSavedData = savedData && savedData.eventName && savedData.eventName.trim() !== '';
+        
+        // Determinar si los datos guardados son diferentes de la plantilla inicial por defecto
+        let hasSavedChanges = false;
+        try {
+            const rawSaved = localStorage.getItem(this.storage.storageKey || 'invitation_data');
+            if (rawSaved) {
+                const parsed = JSON.parse(rawSaved);
+                const defaultData = this.storage.getDefaultData();
+                
+                // Normalizar fechas/momentos dinámicos en los metadatos para evitar falsos positivos
+                if (parsed.lastModified) parsed.lastModified = null;
+                if (defaultData.lastModified) defaultData.lastModified = null;
+                
+                hasSavedChanges = JSON.stringify(parsed) !== JSON.stringify(defaultData);
+            }
+        } catch (_) {}
 
-        if (hasSavedData) {
+        if (hasSavedChanges) {
             this.showStartupDialog(savedData);
         } else {
-            // No hay datos guardados, iniciar con datos predeterminados
+            // No hay cambios guardados respecto a la plantilla, iniciar directamente
             this.data = savedData;
             this.initEditor();
         }
@@ -196,6 +214,10 @@ class InvitationEditor {
         document.getElementById('startupNew')?.addEventListener('click', () => {
             overlay.remove();
             this.data = this.storage.getDefaultData();
+            // Limpiar localStorage de borradores previos para iniciar completamente limpio
+            try {
+                localStorage.removeItem(this.storage.storageKey || 'invitation_data');
+            } catch (_) {}
             this.initEditor();
         });
 
@@ -300,8 +322,8 @@ const invitationEditor = new InvitationEditor();
 window.invitationEditor = invitationEditor;
 
 // Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    invitationEditor.initialize();
+document.addEventListener('DOMContentLoaded', async () => {
+    await invitationEditor.initialize();
 });
 
 window.InvitationEditor = InvitationEditor;

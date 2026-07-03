@@ -1,0 +1,29 @@
+{
+  "theme": {
+    "id": "graduacion-oscuro",
+    "name": "Graduación Oscuro",
+    "version": 1,
+    "category": "graduacion",
+    "tokens": {
+      "colors": {
+        "primary": "#E8C170",
+        "secondary": "#1A1A2E",
+        "text": "#E0E0E0"
+      },
+      "fonts": {
+        "heading": "'Cinzel', serif",
+        "body": "'Raleway', sans-serif"
+      },
+      "effects": {
+        "backgroundEffect": "stars",
+        "overlayOpacity": 40
+      }
+    },
+    "layout": {
+      "backgroundFill": {
+        "fillType": "gradient",
+        "fillGradient": "linear-gradient(160deg, #0A0A1A 0%, #1A1A2E 50%, #0F0F1F 100%)"
+      }
+    }
+  }
+}

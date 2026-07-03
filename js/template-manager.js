@@ -7,10 +7,12 @@ class InvitationTemplateManager {
         this.pendingSaveName = '';
         this.draftSaveTimer = 0;
         this.draftSaveDelay = 500;
+        this._templatesCache = null; // Cache en memoria para lectura síncrona
     }
 
-    init(editor) {
+    async init(editor) {
         this.editor = editor;
+        await this.loadTemplatesAsync(); // Cargar plantillas desde IndexedDB
         this.bindUI();
         this.bindModalEvents();
         this.renderTemplates();
@@ -103,22 +105,17 @@ class InvitationTemplateManager {
             this.notify('No hay datos para guardar', 'error');
             return;
         }
-        if (typeof Storage === 'undefined') {
-            this.notify('localStorage no disponible', 'error');
-            return;
-        }
-        try {
-            const key = `invitation_draft_${Date.now()}`;
-            const payload = JSON.stringify(this.editor.data);
-            localStorage.setItem(key, payload);
-            this.flashDraftButton();
-            this.notify('Borrador guardado', 'success');
-        } catch (e) {
-            if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
-                this.notify('Espacio en localStorage agotado', 'error');
-            } else {
-                this.notify('Error al guardar borrador', 'error');
-            }
+        const key = `invitation_draft_${Date.now()}`;
+        const payload = this.editor.data;
+        if (window.indexedDBManager) {
+            window.indexedDBManager.put(key, payload)
+                .then(() => {
+                    this.flashDraftButton();
+                    this.notify('Borrador guardado', 'success');
+                })
+                .catch(() => this.notify('Error al guardar borrador', 'error'));
+        } else {
+            this.notify('IndexedDB no disponible', 'error');
         }
     }
 
@@ -150,14 +147,22 @@ class InvitationTemplateManager {
     }
 
     loadTemplates() {
+        // Retornar desde caché en memoria si existe (sincrónico)
+        return this._templatesCache || [];
+    }
+
+    /**
+     * Carga las plantillas desde IndexedDB y actualiza la caché
+     */
+    async loadTemplatesAsync() {
         try {
-            const raw = localStorage.getItem(this.storageKey);
-            const parsed = raw ? JSON.parse(raw) : [];
-            if (!Array.isArray(parsed)) return [];
-            return parsed;
-        } catch (_) {
-            return [];
+            const data = await window.indexedDBManager.get(this.storageKey);
+            this._templatesCache = Array.isArray(data) ? data : [];
+        } catch (e) {
+            console.error('[TemplateManager] Error cargando plantillas:', e);
+            this._templatesCache = [];
         }
+        return this._templatesCache;
     }
 
     getTemplateById(templateId) {
@@ -166,13 +171,12 @@ class InvitationTemplateManager {
     }
 
     saveTemplates(list) {
-        try {
-            localStorage.setItem(this.storageKey, JSON.stringify(list));
-            return true;
-        } catch (e) {
-            console.error('TemplateManager: Error guardando templates', e);
-            return false;
+        this._templatesCache = Array.isArray(list) ? list : [];
+        if (window.indexedDBManager) {
+            window.indexedDBManager.put(this.storageKey, this._templatesCache)
+                .catch(e => console.error('[TemplateManager] Error guardando plantillas:', e));
         }
+        return true;
     }
 
     upsertTemplate(template) {

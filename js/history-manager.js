@@ -120,7 +120,8 @@ class HistoryManager {
         const startTime = performance.now();
 
         try {
-            const stateClone = JSON.parse(JSON.stringify(data));
+            // Guardar estado LIGERO (sin imágenes base64 para no saturar localStorage)
+            const lightState = this._stripMedia(data);
             const priority = this.getActionPriority(actionName);
             const timestamp = Date.now();
 
@@ -129,64 +130,108 @@ class HistoryManager {
                 const timeDiff = timestamp - this.pendingTransaction.meta.timestamp;
 
                 if (timeDiff < this.deduplicationWindow) {
-                    // Dentro de la ventana de deduplicación
                     const pendingPriority = this.getActionPriority(this.pendingTransaction.meta.name);
-
-                    // Comparar estados para ver si es el mismo cambio
-                    const sameState = JSON.stringify(this.pendingTransaction.state) === JSON.stringify(stateClone);
+                    const sameState = JSON.stringify(this.pendingTransaction.state) === JSON.stringify(lightState);
 
                     if (sameState) {
-                        // Mismo estado: Mantener el de mayor prioridad
                         if (priority > pendingPriority) {
-                            console.log(`[HistoryManager] Reemplazando "${this.pendingTransaction.meta.name}" con "${actionName}" (mayor prioridad)`);
                             this.pendingTransaction = {
-                                state: stateClone,
+                                state: lightState,
                                 meta: { name: actionName, timestamp, priority }
                             };
-                        } else {
-                            console.log(`[HistoryManager] Ignorando "${actionName}" - ya existe "${this.pendingTransaction.meta.name}" con mayor/igual prioridad`);
                         }
-                        // Reiniciar timeout
                         this.resetTransactionTimeout();
                         return;
                     } else {
-                        // Estado diferente: Commitear la transacción pendiente y crear nueva
                         this.commitPendingTransaction();
                     }
                 } else {
-                    // Fuera de ventana: Commitear pendiente
                     this.commitPendingTransaction();
                 }
             }
 
-            // 2. Evitar duplicados consecutivos exactos en el stack
+            // 2. Evitar duplicados consecutivos exactos
             if (this.undoStack.length > 0) {
                 const lastEntry = this.undoStack[this.undoStack.length - 1];
                 const lastData = lastEntry.meta ? lastEntry.state : lastEntry;
-
-                if (JSON.stringify(lastData) === JSON.stringify(stateClone)) {
-                    console.log(`[HistoryManager] Ignorando duplicado exacto: "${actionName}"`);
-                    return;
-                }
+                if (JSON.stringify(lastData) === JSON.stringify(lightState)) return;
             }
 
-            // 3. Crear nueva transacción pendiente
+            // 3. Nueva transacción pendiente con estado ligero
             this.pendingTransaction = {
-                state: stateClone,
+                state: lightState,
                 meta: { name: actionName, timestamp, priority }
             };
-
-            // 4. Configurar auto-commit después de la ventana de deduplicación
             this.resetTransactionTimeout();
 
             const elapsed = performance.now() - startTime;
-            if (elapsed > 100) {
-                console.warn(`[HistoryManager] saveState tardó ${elapsed.toFixed(2)}ms - excede límite de 100ms`);
-            }
+            if (elapsed > 50) console.warn(`[HistoryManager] saveState tardió ${elapsed.toFixed(2)}ms`);
 
         } catch (e) {
             console.error('HistoryManager: Error saving state', e);
         }
+    }
+
+    /**
+     * Elimina las imágenes base64 del estado antes de guardarlo en el historial.
+     * Reduce cada entrada de ~800 KB a ~4 KB.
+     * Los medios se preservan en el estado 'actual' del editor y se reinyectan en undo/redo.
+     */
+    _stripMedia(data) {
+        const PLACEHOLDER = '__MEDIA_PRESERVED__';
+        const clone = JSON.parse(JSON.stringify(data));
+
+        // Foto del festejado
+        if (typeof clone.honoredPhoto === 'string' && clone.honoredPhoto.length > 500) {
+            clone.honoredPhoto = PLACEHOLDER;
+        }
+        // Imagen de fondo
+        if (typeof clone.backgroundImage === 'string' && clone.backgroundImage.length > 500) {
+            clone.backgroundImage = PLACEHOLDER;
+        }
+        // Video de fondo
+        if (typeof clone.backgroundVideo === 'string' && clone.backgroundVideo.length > 500) {
+            clone.backgroundVideo = PLACEHOLDER;
+        }
+        // Nota de audio
+        if (typeof clone.audioNote === 'string' && clone.audioNote.length > 500) {
+            clone.audioNote = PLACEHOLDER;
+        }
+        // Galería de imágenes
+        if (Array.isArray(clone.gallery?.images)) {
+            clone.gallery.images = clone.gallery.images.map(img => ({
+                ...img,
+                data: typeof img.data === 'string' && img.data.length > 500 ? PLACEHOLDER : img.data
+            }));
+        }
+
+        return clone;
+    }
+
+    /**
+     * Reinyecta los medios del estado actual en un estado ligero restaurado por undo/redo.
+     * Garantiza que las imágenes nunca se pierdan al navegar el historial.
+     */
+    _restoreMedia(lightState, currentData) {
+        const PLACEHOLDER = '__MEDIA_PRESERVED__';
+        if (!currentData) return lightState;
+
+        if (lightState.honoredPhoto === PLACEHOLDER) lightState.honoredPhoto = currentData.honoredPhoto;
+        if (lightState.backgroundImage === PLACEHOLDER) lightState.backgroundImage = currentData.backgroundImage;
+        if (lightState.backgroundVideo === PLACEHOLDER) lightState.backgroundVideo = currentData.backgroundVideo;
+        if (lightState.audioNote === PLACEHOLDER) lightState.audioNote = currentData.audioNote;
+
+        if (Array.isArray(lightState.gallery?.images) && Array.isArray(currentData.gallery?.images)) {
+            const currentImgMap = new Map(currentData.gallery.images.map(i => [i.id, i]));
+            lightState.gallery.images = lightState.gallery.images.map(img => {
+                if (img.data === PLACEHOLDER && currentImgMap.has(img.id)) {
+                    return { ...img, data: currentImgMap.get(img.id).data };
+                }
+                return img;
+            });
+        }
+
+        return lightState;
     }
 
     /**
@@ -242,19 +287,19 @@ class HistoryManager {
         this.isNavigating = true;
 
         try {
-            // Guardar estado actual en Redo
-            const currentState = JSON.parse(JSON.stringify(this.editor.data));
+            // Guardar estado actual (ligero) en Redo
+            const currentLight = this._stripMedia(this.editor.data);
 
             const entry = this.undoStack.pop();
-            const dataToLoad = entry.meta ? entry.state : entry;
+            const lightState = entry.meta ? entry.state : entry;
             const meta = entry.meta || { name: 'Acción anterior', timestamp: Date.now() };
 
-            this.redoStack.push({
-                state: currentState,
-                meta: meta
-            });
+            this.redoStack.push({ state: currentLight, meta });
 
-            this.editor.loadData(dataToLoad);
+            // Restaurar medios desde el estado actual antes de cargar
+            const fullState = this._restoreMedia(lightState, this.editor.data);
+
+            this.editor.loadData(fullState);
             this.showNotification(`Deshacer: ${meta.name}`);
 
         } catch (e) {
@@ -272,18 +317,18 @@ class HistoryManager {
         this.isNavigating = true;
 
         try {
-            const currentState = JSON.parse(JSON.stringify(this.editor.data));
+            const currentLight = this._stripMedia(this.editor.data);
 
             const entry = this.redoStack.pop();
-            const dataToLoad = entry.meta ? entry.state : entry;
+            const lightState = entry.meta ? entry.state : entry;
             const meta = entry.meta || { name: 'Acción rehecha', timestamp: Date.now() };
 
-            this.undoStack.push({
-                state: currentState,
-                meta: meta
-            });
+            this.undoStack.push({ state: currentLight, meta });
 
-            this.editor.loadData(dataToLoad);
+            // Restaurar medios desde el estado actual antes de cargar
+            const fullState = this._restoreMedia(lightState, this.editor.data);
+
+            this.editor.loadData(fullState);
             this.showNotification(`Rehacer: ${meta.name}`);
 
         } catch (e) {
@@ -313,29 +358,33 @@ class HistoryManager {
         }
     }
 
+    /**
+     * Persiste el historial ligero en IndexedDB (async, no bloqueante)
+     */
     saveToStorage() {
-        try {
-            localStorage.setItem(this.storageKeyUndo, JSON.stringify(this.undoStack));
-            localStorage.setItem(this.storageKeyRedo, JSON.stringify(this.redoStack));
-        } catch (e) {
-            console.warn('HistoryManager: Storage quota exceeded or error', e);
-        }
+        if (!window.indexedDBManager) return;
+        // Fire-and-forget — el historial es ligero, los errores no son críticos
+        Promise.all([
+            window.indexedDBManager.put(this.storageKeyUndo, this.undoStack),
+            window.indexedDBManager.put(this.storageKeyRedo, this.redoStack)
+        ]).catch(e => console.warn('[HistoryManager] No se pudo persistir historial:', e));
     }
 
-    loadFromStorage() {
+    /**
+     * Carga el historial desde IndexedDB (llamar una vez al inicializar)
+     */
+    async loadFromStorage() {
+        if (!window.indexedDBManager) return;
         try {
-            const u = localStorage.getItem(this.storageKeyUndo);
-            const r = localStorage.getItem(this.storageKeyRedo);
-            if (u) {
-                const parsed = JSON.parse(u);
-                if (Array.isArray(parsed)) this.undoStack = parsed;
-            }
-            if (r) {
-                const parsed = JSON.parse(r);
-                if (Array.isArray(parsed)) this.redoStack = parsed;
-            }
+            const [u, r] = await Promise.all([
+                window.indexedDBManager.get(this.storageKeyUndo),
+                window.indexedDBManager.get(this.storageKeyRedo)
+            ]);
+            if (Array.isArray(u)) this.undoStack = u;
+            if (Array.isArray(r)) this.redoStack = r;
+            this.updateUI();
         } catch (e) {
-            console.error('HistoryManager: Error loading storage', e);
+            console.error('[HistoryManager] Error cargando historial:', e);
             this.undoStack = [];
             this.redoStack = [];
         }
@@ -349,18 +398,16 @@ class HistoryManager {
         this.undoStack = [];
         this.redoStack = [];
 
-        // Limpiar localStorage
-        try {
-            localStorage.removeItem(this.storageKeyUndo);
-            localStorage.removeItem(this.storageKeyRedo);
-        } catch (e) {
-            console.warn('HistoryManager: Error clearing storage', e);
+        // Limpiar de IndexedDB
+        if (window.indexedDBManager) {
+            Promise.all([
+                window.indexedDBManager.delete(this.storageKeyUndo),
+                window.indexedDBManager.delete(this.storageKeyRedo)
+            ]).catch(e => console.warn('[HistoryManager] Error al limpiar historial:', e));
         }
 
-        // Actualizar UI
         this.updateUI();
-
-        console.log('HistoryManager: Historia limpiada');
+        console.log('[HistoryManager] Historia limpiada.');
     }
 }
 

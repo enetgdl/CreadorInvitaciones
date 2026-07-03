@@ -1,0 +1,29 @@
+{
+  "theme": {
+    "id": "cumple-tropical",
+    "name": "Fiesta Tropical",
+    "version": 1,
+    "category": "cumpleanos",
+    "tokens": {
+      "colors": {
+        "primary": "#FF6B35",
+        "secondary": "#FFD23F",
+        "text": "#1A1A1A"
+      },
+      "fonts": {
+        "heading": "'Fredoka One', cursive",
+        "body": "'Nunito', sans-serif"
+      },
+      "effects": {
+        "backgroundEffect": "confetti",
+        "overlayOpacity": 15
+      }
+    },
+    "layout": {
+      "backgroundFill": {
+        "fillType": "gradient",
+        "fillGradient": "linear-gradient(135deg, #06D6A0 0%, #1B998B 40%, #3A0CA3 100%)"
+      }
+    }
+  }
+}

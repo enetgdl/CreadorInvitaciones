@@ -1,0 +1,53 @@
+{
+  "version": "1.0",
+  "presets": [
+    {
+      "id": "xv-dorado-elegante",
+      "name": "XV Dorado Elegante",
+      "category": "xv",
+      "tags": ["elegante", "dorado", "formal", "xv"],
+      "preview_colors": ["#B8860B", "#FFF8DC", "#4A3728"],
+      "file": "resources/presets/xv-dorado-elegante.json"
+    },
+    {
+      "id": "boda-blanca-clasica",
+      "name": "Boda Blanca Clásica",
+      "category": "boda",
+      "tags": ["boda", "blanco", "clásico", "elegante"],
+      "preview_colors": ["#C8A96A", "#FFFFFF", "#2C2C2C"],
+      "file": "resources/presets/boda-blanca-clasica.json"
+    },
+    {
+      "id": "botanico-verde",
+      "name": "Botánico Verde",
+      "category": "general",
+      "tags": ["botánico", "verde", "naturaleza", "boda", "xv"],
+      "preview_colors": ["#2D5016", "#D4AF37", "#F9F6F0"],
+      "file": "resources/presets/botanico-verde.json"
+    },
+    {
+      "id": "cumple-tropical",
+      "name": "Fiesta Tropical",
+      "category": "cumpleanos",
+      "tags": ["cumpleaños", "tropical", "colorido", "festivo"],
+      "preview_colors": ["#FF6B35", "#FFD23F", "#06D6A0"],
+      "file": "resources/presets/cumple-tropical.json"
+    },
+    {
+      "id": "bautizo-celeste",
+      "name": "Bautizo Celeste",
+      "category": "bautizo",
+      "tags": ["bautizo", "azul", "celeste", "bebé", "suave"],
+      "preview_colors": ["#87CEEB", "#FFFFFF", "#4A90D9"],
+      "file": "resources/presets/bautizo-celeste.json"
+    },
+    {
+      "id": "graduacion-oscuro",
+      "name": "Graduación Oscuro",
+      "category": "graduacion",
+      "tags": ["graduación", "oscuro", "elegante", "formal"],
+      "preview_colors": ["#1A1A2E", "#E8C170", "#C0C0C0"],
+      "file": "resources/presets/graduacion-oscuro.json"
+    }
+  ]
+}

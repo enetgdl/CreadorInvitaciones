@@ -1,0 +1,29 @@
+{
+  "theme": {
+    "id": "boda-blanca-clasica",
+    "name": "Boda Blanca Clásica",
+    "version": 1,
+    "category": "boda",
+    "tokens": {
+      "colors": {
+        "primary": "#C8A96A",
+        "secondary": "#F5F0E8",
+        "text": "#2C2C2C"
+      },
+      "fonts": {
+        "heading": "'Cinzel', serif",
+        "body": "'Lora', serif"
+      },
+      "effects": {
+        "backgroundEffect": "bokeh",
+        "overlayOpacity": 20
+      }
+    },
+    "layout": {
+      "backgroundFill": {
+        "fillType": "gradient",
+        "fillGradient": "linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%)"
+      }
+    }
+  }
+}

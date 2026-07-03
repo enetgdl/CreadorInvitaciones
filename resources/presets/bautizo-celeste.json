@@ -1,0 +1,29 @@
+{
+  "theme": {
+    "id": "bautizo-celeste",
+    "name": "Bautizo Celeste",
+    "version": 1,
+    "category": "bautizo",
+    "tokens": {
+      "colors": {
+        "primary": "#4A90D9",
+        "secondary": "#EBF5FF",
+        "text": "#1A3550"
+      },
+      "fonts": {
+        "heading": "'Dancing Script', cursive",
+        "body": "'Poppins', sans-serif"
+      },
+      "effects": {
+        "backgroundEffect": "bubbles",
+        "overlayOpacity": 20
+      }
+    },
+    "layout": {
+      "backgroundFill": {
+        "fillType": "gradient",
+        "fillGradient": "linear-gradient(180deg, #A8D8EA 0%, #87CEEB 50%, #4A90D9 100%)"
+      }
+    }
+  }
+}
