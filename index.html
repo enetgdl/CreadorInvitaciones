@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Content Security Policy: Prevención de XSS -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: blob: https://api.qrserver.com https://maps.google.com;
+        frame-src https://maps.google.com blob:;
+        connect-src 'self';
+        media-src 'self' blob:;
+    ">
+    <title>Editor de Invitaciones Digitales - Creador Profesional</title>
+    <meta name="description"
+        content="Crea invitaciones digitales únicas para XV años, bodas, bautizos y más con nuestro editor interactivo">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/scrollbars.css">
+    <link rel="stylesheet" href="css/design-advanced.css">
+    <link rel="stylesheet" href="css/settings.css">
+    <link rel="stylesheet" href="css/design-sections.css">
+    <link rel="stylesheet" href="css/gallery-editor.css">
+    <link rel="stylesheet" href="css/color-picker.css">
+    <!-- Enhanced Layer Panel Styles -->
+    <link rel="stylesheet" href="css/enhanced-layer-panel.css">
+    <link rel="stylesheet" href="css/history-panel.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&family=Cinzel:wght@400;600;700&family=Crimson+ Text:wght@400;600&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&family=Merriweather:wght@300;400;700&family=EB+Garamond:wght@400;600&family=Bodoni+Moda:wght@400;700&family=Spectral:wght@400;600&family=Montserrat:wght@300;400;600;700&family=Poppins:wght@300;400;600;700&family=Raleway:wght@300;400;600&family=Nunito:wght@300;400;600;700&family=Work+Sans:wght@300;400;600&family=Inter:wght@300;400;600&family=Rubik:wght@300;400;600&family=DM+Sans:wght@400;500;700&family=Josefin+Sans:wght@300;400;600&family=Quicksand:wght@400;500;700&family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Pacifico&family=Sacramento&family=Allura&family=Satisfy&family=Kaushan+Script&family=Cookie&family=Alex+Brush&family=Amatic+SC:wght@400;700&family=Fredoka+One&family=Lilita+One&family=Baloo+2:wght@400;700&family=Caveat:wght@400;700&family=Indie+Flower&family=Permanent+Marker&family=Righteous&family=Chewy&family=Lobster&family=Bangers&family=Bungee&family=Carter+One&family=Monoton&family=Abril+Fatface&family=Bebas+Neue&family=Anton&family=Philosopher:wght@400;700&family=Orbitron:wght@400;700&family=Press+Start+2P&family=Archivo+Black&family=Oswald:wght@400;600&family=Bitter:wght@400;700&family=Vollkorn:wght@400;700&family=Cabin:wght@400;600&family=Arvo:wght@400;700&family=PT+Serif:wght@400;700&family=Source+Sans+Pro:wght@400;600&family=Ubuntu:wght@400;700&family=Lato:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .theme-selector-grid {
+            grid-template-columns: repeat(6, 1fr) !important;
+            gap: 6px !important;
+        }
+
+        .theme-color-option {
+            width: 100%;
+            aspect-ratio: 1;
+            height: auto;
+            border-radius: 6px;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .theme-color-option:hover,
+        .theme-color-option.active {
+            border: 2px solid #000;
+            transform: scale(1.05);
+            z-index: 1;
+        }
+
+        .theme-color-option:not(.theme-custom-option).active::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+            font-weight: bold;
+        }
+
+        .theme-custom-option {
+            background: conic-gradient(from 180deg at 50% 50%, #FF0000 0deg, #FFFF00 60deg, #00FF00 120deg, #00FFFF 180deg, #0000FF 240deg, #FF00FF 300deg, #FF0000 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-custom-option::before {
+            content: '🎨';
+            font-size: 1.4rem;
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+        }
+
+        .theme-custom-input {
+            opacity: 0;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;">
+        <symbol id="i-new" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </symbol>
+        <symbol id="i-open" viewBox="0 0 24 24">
+            <path d="M4 19V7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+            <path d="M4 11h20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </symbol>
+        <symbol id="i-save" viewBox="0 0 24 24">
+            <path d="M5 5h12l2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linejoin="round" />
+            <path d="M7 5v6h10V5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+            <path d="M8 21v-6h8v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        </symbol>
+        <symbol id="i-template" viewBox="0 0 24 24">
+            <path d="M6 3h9l3 3v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linejoin="round" />
+            <path d="M9 7h6v10l-3-2-3 2V7Z" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linejoin="round" />
+        </symbol>
+        <symbol id="i-export" viewBox="0 0 24 24">
+            <path d="M12 3v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            <path d="M5 21h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </symbol>
+        <symbol id="i-undo" viewBox="0 0 24 24">
+            <path d="M9 14 4 9l5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            <path d="M20 20a8 8 0 0 0-8-8H4" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" />
+        </symbol>
+        <symbol id="i-redo" viewBox="0 0 24 24">
+            <path d="m15 4 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            <path d="M4 20a8 8 0 0 1 8-8h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </symbol>
+        <symbol id="i-preview" viewBox="0 0 24 24">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" fill="none" stroke="currentColor"
+                stroke-width="2" />
+            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" stroke-width="2" />
+        </symbol>
+        <symbol id="i-refresh" viewBox="0 0 24 24">
+            <path d="M21 12a9 9 0 1 1-3-6.7" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" />
+            <path d="M21 3v6h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+        </symbol>
+        <symbol id="i-fullscreen" viewBox="0 0 24 24">
+            <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+        </symbol>
+        <symbol id="i-settings" viewBox="0 0 24 24">
+            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor"
+                stroke-width="2" />
+            <path
+                d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.1-2-3.5-2.2.7a7.4 7.4 0 0 0-1.7-1l-.3-2.3H10.7l-.3 2.3a7.4 7.4 0 0 0-1.7 1l-2.2-.7-2 3.5 2 1.1a7.8 7.8 0 0 0 .1 2l-2 1.1 2 3.5 2.2-.7c.5.4 1.1.8 1.7 1l.3 2.3h4.6l.3-2.3c.6-.2 1.2-.6 1.7-1l2.2.7 2-3.5-2-1.1Z"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        </symbol>
+        <symbol id="i-fill" viewBox="0 0 24 24">
+            <path d="M3 21h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path d="M7 14 15 6l3 3-8 8H7v-3Z" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linejoin="round" />
+            <path d="M15 6l2-2 3 3-2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        </symbol>
+        <symbol id="i-help" viewBox="0 0 24 24">
+            <path d="M12 18h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.9.8-1.2 1.2-1.2 2.2" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" />
+            <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" fill="none" stroke="currentColor" stroke-width="2" />
+        </symbol>
+        <symbol id="i-image" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="m21 15-5-5L5 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        </symbol>
+        <symbol id="i-text" viewBox="0 0 24 24">
+            <path d="M4 6V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v1M7 6v1M17 6v1M12 7v13M9 20h6" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </symbol>
+    </svg>
+
+    <header class="top-menu-bar" aria-label="Aplicación">
+        <div class="app-bar">
+            <nav class="menu-bar" aria-label="Menús">
+                <button class="menu-bar-btn" id="menuFileBtn" type="button" aria-haspopup="menu" aria-expanded="false"
+                    aria-controls="menuFile">Archivo</button>
+                <button class="menu-bar-btn" id="menuEditBtn" type="button" aria-haspopup="menu" aria-expanded="false"
+                    aria-controls="menuEdit">Edición</button>
+                <button class="menu-bar-btn" id="menuHelpBtn" type="button" aria-haspopup="menu" aria-expanded="false"
+                    aria-controls="menuHelp">Ayuda</button>
+            </nav>
+
+            <div class="app-bar-right">
+                <div class="app-title-display">
+                    <span class="app-icon">✨</span>
+                    <span class="app-name">Creador de Invitaciones Digitales</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar" role="toolbar" aria-label="Acciones rápidas">
+            <button id="templateNewBtn" class="tool-btn" type="button" title="Nuevo (Ctrl+N)"
+                aria-label="Nuevo (Ctrl+N)">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-new"></use>
+                </svg>
+            </button>
+            <button id="templateOpenBtn" class="tool-btn" type="button" title="Abrir (Ctrl+O)"
+                aria-label="Abrir (Ctrl+O)">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-open"></use>
+                </svg>
+            </button>
+            <button id="draftSaveBtn" class="tool-btn" type="button" title="Guardar" aria-label="Guardar">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-save"></use>
+                </svg>
+            </button>
+            <button id="templateSaveBtn" class="tool-btn" type="button" title="Guardar Plantilla (Ctrl+S)"
+                aria-label="Guardar Plantilla (Ctrl+S)">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-template"></use>
+                </svg>
+            </button>
+            <button id="exportBtn" class="tool-btn tool-btn-accent" type="button" title="Exportar"
+                aria-label="Exportar">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-export"></use>
+                </svg>
+            </button>
+
+            <div class="toolbar-sep" aria-hidden="true"></div>
+
+            <button id="undoBtn" class="tool-btn" type="button" title="Deshacer (Ctrl+Z)" aria-label="Deshacer (Ctrl+Z)"
+                disabled>
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-undo"></use>
+                </svg>
+            </button>
+            <button id="redoBtn" class="tool-btn" type="button" title="Rehacer (Ctrl+Y)" aria-label="Rehacer (Ctrl+Y)"
+                disabled>
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-redo"></use>
+                </svg>
+            </button>
+
+            <div class="toolbar-sep" aria-hidden="true"></div>
+
+            <button id="insertImageBtn" class="tool-btn" type="button" title="Insertar imagen"
+                aria-label="Insertar imagen">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-image"></use>
+                </svg>
+            </button>
+            <button id="insertTextBtn" class="tool-btn" type="button" title="Insertar texto"
+                aria-label="Insertar texto">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-text"></use>
+                </svg>
+            </button>
+
+            <button id="previewBtn" class="tool-btn" type="button" title="Vista previa externa"
+                aria-label="Vista previa externa">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-preview"></use>
+                </svg>
+            </button>
+            <button id="refreshBtn" class="tool-btn" type="button" title="Actualizar vista previa"
+                aria-label="Actualizar vista previa">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-refresh"></use>
+                </svg>
+            </button>
+            <button id="fullscreenBtn" class="tool-btn" type="button" title="Pantalla completa"
+                aria-label="Pantalla completa">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-fullscreen"></use>
+                </svg>
+            </button>
+
+            <div class="toolbar-sep" aria-hidden="true"></div>
+
+            <button id="advancedFillBtn" class="tool-btn" type="button" title="Relleno avanzado"
+                aria-label="Relleno avanzado">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-fill"></use>
+                </svg>
+            </button>
+
+            <button id="historyPanelBtn" class="tool-btn" type="button" title="Historia de Acciones"
+                aria-label="Historia de Acciones">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z" fill="none"
+                        stroke="currentColor" stroke-width="2" />
+                    <path d="M12 6v6l4 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </button>
+
+            <div class="toolbar-sep" aria-hidden="true"></div>
+            <div class="toolbar-zoom" role="group" aria-label="Zoom del dispositivo">
+                <div class="status-bar" role="group" aria-label="Controles de zoom">
+                    <button type="button" class="status-btn" id="zoomOutBtn" aria-label="Alejar"
+                        title="Alejar">−</button>
+                    <input type="range" class="status-range" id="zoomRange" min="25" max="200" value="100" step="5"
+                        aria-label="Zoom" title="Zoom">
+                    <button type="button" class="status-btn" id="zoomInBtn" aria-label="Acercar"
+                        title="Acercar">+</button>
+                    <div class="status-text" id="zoomValue" aria-label="Porcentaje de zoom">100%</div>
+                </div>
+            </div>
+
+
+
+            <button id="settingsBtn" class="tool-btn" type="button" title="Configuración" aria-label="Configuración"
+                style="margin-left: 20px;">
+                <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="#i-settings"></use>
+                </svg>
+            </button>
+        </div>
+
+        <div class="menu-popover" id="menuFile" role="menu" aria-label="Archivo" hidden>
+            <button type="button" class="menu-item" role="menuitem" data-action="trigger"
+                data-target="templateNewBtn">Nuevo <span class="menu-kbd">Ctrl+N</span></button>
+            <button type="button" class="menu-item" role="menuitem" data-action="trigger"
+                data-target="templateOpenBtn">Abrir <span class="menu-kbd">Ctrl+O</span></button>
+            <button type="button" class="menu-item" role="menuitem" data-action="trigger"
+                data-target="templateSaveBtn">Guardar <span class="menu-kbd">Ctrl+S</span></button>
+            <div class="menu-divider" role="separator"></div>
+            <button type="button" class="menu-item" role="menuitem" data-action="trigger"
+                data-target="exportBtn">Exportar</button>
+        </div>
+
+        <div class="menu-popover" id="menuEdit" role="menu" aria-label="Edición" hidden>
+            <button type="button" class="menu-item" role="menuitem" data-action="trigger" data-target="undoBtn">Deshacer
+                <span class="menu-kbd">Ctrl+Z</span></button>
+            <button type="button" class="menu-item" role="menuitem" data-action="trigger" data-target="redoBtn">Rehacer
+                <span class="menu-kbd">Ctrl+Y</span></button>
+            <div class="menu-divider" role="separator"></div>
+            <button type="button" class="menu-item" role="menuitem" data-action="exec" data-cmd="cut">Cortar <span
+                    class="menu-kbd">Ctrl+X</span></button>
+            <button type="button" class="menu-item" role="menuitem" data-action="exec" data-cmd="copy">Copiar <span
+                    class="menu-kbd">Ctrl+C</span></button>
+            <button type="button" class="menu-item" role="menuitem" data-action="exec" data-cmd="paste">Pegar <span
+                    class="menu-kbd">Ctrl+V</span></button>
+        </div>
+
+        <div class="menu-popover" id="menuHelp" role="menu" aria-label="Ayuda" hidden>
+            <button id="helpDocsBtn" type="button" class="menu-item" role="menuitem">Documentación</button>
+            <button id="helpAboutBtn" type="button" class="menu-item" role="menuitem">Acerca de</button>
+            <button id="helpReportBtn" type="button" class="menu-item" role="menuitem">Reportar</button>
+        </div>
+    </header>
+
+    <div class="editor-container">
+        <!-- Panel Lateral de Control -->
+        <aside class="control-panel" id="leftPanel">
+
+
+            <!-- Tabs de Secciones -->
+            <div class="tabs">
+                <button class="tab-btn" data-tab="general">
+                    <span class="tab-icon">⚙️</span>
+                    General
+                </button>
+                <button class="tab-btn" data-tab="gallery">
+                    <span class="tab-icon">📷</span>
+                    Galería
+                </button>
+                <button class="tab-btn" data-tab="content">
+                    <span class="tab-icon">📝</span>
+                    Contenido
+                </button>
+                <button class="tab-btn" data-tab="interactive">
+                    <span class="tab-icon">🔮</span>
+                    Interactivo
+                </button>
+                <button class="tab-btn" data-tab="media">
+                    <span class="tab-icon">🎬</span>
+                    Multimedia
+                </button>
+                <button class="tab-btn" data-tab="design">
+                    <span class="tab-icon">✨</span>
+                    Efectos
+                </button>
+            </div>
+
+            <!-- Contenido de Tabs -->
+            <div class="tab-content">
+                <!-- Tab General -->
+                <div class="tab-panel" id="general-panel">
+                    <div class="control-group">
+                        <label class="control-label">Tipo de Evento</label>
+                        <select id="eventType" class="control-input">
+                            <option value="xv">XV Años</option>
+                            <option value="boda">Boda</option>
+                            <option value="bautizo">Bautizo</option>
+                            <option value="cumpleanos">Cumpleaños</option>
+                            <option value="graduacion">Graduación</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Nombre del Evento</label>
+                        <input type="text" id="eventName" class="control-input" placeholder="Ej: Mis XV Años">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Nombre de(los) Festejado(s)</label>
+                        <textarea id="honoredName" class="control-input" rows="2" placeholder="Adriel Reyes"></textarea>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Fecha del Evento</label>
+                        <input type="date" id="eventDate" class="control-input">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Hora del Evento</label>
+                        <input type="time" id="eventTime" class="control-input" value="12:00">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Lugar del Evento</label>
+                        <input type="text" id="eventLocation" class="control-input" placeholder="Ej: Salón Los Pinos">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Dirección</label>
+                        <textarea id="eventAddress" class="control-input" rows="3"
+                            placeholder="Calle, número, colonia, ciudad"></textarea>
+                    </div>
+
+                    <!-- Campos de Misa/Ceremonia -->
+                    <div class="control-group">
+                        <div class="switch-header"
+                            style="justify-content: space-between; display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <label class="control-label" style="margin-bottom: 0;">Lugar de la Misa</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableMassLocation" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="text" id="massLocation" class="control-input"
+                            placeholder="Ej: Parroquia de San Juan">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="switch-header"
+                            style="justify-content: space-between; display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <label class="control-label" style="margin-bottom: 0;">Hora de la Misa</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableMassTime" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="time" id="massTime" class="control-input" value="10:00">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="switch-header"
+                            style="justify-content: space-between; display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <label class="control-label" style="margin-bottom: 0;">Dirección del Templo</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableMassAddress" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <textarea id="massAddress" class="control-input" rows="2"
+                            placeholder="Calle del Templo, Colonia, Ciudad"></textarea>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Tema</label>
+                        <div class="theme-selector-grid" id="themeSelector">
+                            <!-- Fila 1 -->
+                            <div class="theme-color-option" data-color="#003366" data-secondary="#E8EAF6"
+                                style="background-color: #003366;" title="Azul Marino"></div>
+                            <div class="theme-color-option" data-color="#0066CC" data-secondary="#E6F0FF"
+                                style="background-color: #0066CC;" title="Azul"></div>
+                            <div class="theme-color-option" data-color="#4FC3F7" data-secondary="#E1F5FE"
+                                style="background-color: #4FC3F7;" title="Azul Cielo"></div>
+                            <div class="theme-color-option" data-color="#556B2F" data-secondary="#F1F8E9"
+                                style="background-color: #556B2F;" title="Verde Militar"></div>
+                            <div class="theme-color-option" data-color="#28A745" data-secondary="#E9F7EF"
+                                style="background-color: #28A745;" title="Verde"></div>
+                            <div class="theme-color-option" data-color="#8BC34A" data-secondary="#F1F8E9"
+                                style="background-color: #8BC34A;" title="Verde Limón"></div>
+
+                            <!-- Fila 2 -->
+                            <div class="theme-color-option" data-color="#FD7E14" data-secondary="#FFF0E6"
+                                style="background-color: #FD7E14;" title="Naranja"></div>
+                            <div class="theme-color-option" data-color="#FFC107" data-secondary="#FFF8E1"
+                                style="background-color: #FFC107;" title="Amarillo"></div>
+                            <div class="theme-color-option" data-color="#6F42C1" data-secondary="#F0E6FF"
+                                style="background-color: #6F42C1;" title="Morado"></div>
+                            <div class="theme-color-option" data-color="#9C27B0" data-secondary="#F3E5F5"
+                                style="background-color: #9C27B0;" title="Violeta"></div>
+                            <div class="theme-color-option" data-color="#E83E8C" data-secondary="#FCE6F0"
+                                style="background-color: #E83E8C;" title="Rosa"></div>
+                            <div class="theme-color-option" data-color="#DC3545" data-secondary="#FAEBEB"
+                                style="background-color: #DC3545;" title="Rojo"></div>
+
+                            <!-- Fila 3 -->
+                            <div class="theme-color-option" data-color="#795548" data-secondary="#EFEBE9"
+                                style="background-color: #795548;" title="Café"></div>
+                            <div class="theme-color-option" data-color="#A1887F" data-secondary="#EFEBE9"
+                                style="background-color: #A1887F;" title="Café claro"></div>
+                            <div class="theme-color-option" data-color="#212529" data-secondary="#F8F9FA"
+                                style="background-color: #212529;" title="Negro"></div>
+                            <div class="theme-color-option" data-color="#343A40" data-secondary="#F8F9FA"
+                                style="background-color: #343A40;" title="Gris Oscuro"></div>
+                            <div class="theme-color-option" data-color="#6C757D" data-secondary="#F8F9FA"
+                                style="background-color: #6C757D;" title="Gris"></div>
+
+                            <!-- Personalizado -->
+                            <div class="theme-color-option theme-custom-option" title="Personalizado">
+                                <input type="color" class="theme-custom-input" id="customThemeInput">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Galería -->
+                <div class="tab-panel" id="gallery-panel">
+                    <div class="design-section">
+                        <h3 class="design-section-title">🖼️ Galería de Fotos</h3>
+                        <div class="design-section-content">
+
+                            <div class="control-group">
+                                <label class="control-label">Modo de Visualización</label>
+                                <select id="galleryDisplayMode" class="control-input">
+                                    <option value="collage">Collage Inteligente</option>
+                                    <option value="carousel">Carrusel Dinámico</option>
+                                </select>
+                            </div>
+
+                            <!-- Controles Específicos Carrusel -->
+                            <div id="carousel-controls" style="display:none;">
+                                <div class="control-group">
+                                    <label class="control-label">Efecto de Transición</label>
+                                    <select id="carouselEffect" class="control-input">
+                                        <option value="fade">Desvanecer (Fade)</option>
+                                        <option value="slide">Deslizamiento</option>
+                                        <option value="zoom">Zoom Dinámico</option>
+                                        <option value="flip">Giro 3D</option>
+                                        <option value="cube">Cubo 3D</option>
+                                        <option value="puzzle">Rompecabezas</option>
+                                        <option value="morph">Metamorfosis</option>
+                                        <option value="glitch">Digital Glitch</option>
+                                        <option value="ripple">Ondas</option>
+                                        <option value="wipe">Barrido Color</option>
+                                    </select>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label">Tiempo (segundos): <span
+                                            id="carouselTimeVal">3s</span></label>
+                                    <input type="range" id="carouselInterval" min="1" max="10" step="0.5" value="3"
+                                        class="control-range">
+                                </div>
+                                <div class="control-group"
+                                    style="flex-direction: row; align-items: center; justify-content: space-between;">
+                                    <label>Autoplay</label>
+                                    <input type="checkbox" id="carouselAutoplay" checked>
+                                </div>
+                            </div>
+
+                            <div class="gallery-upload-area" id="gallery-dropzone">
+                                <div class="upload-placeholder">
+                                    <span style="font-size: 2rem;">📤</span>
+                                    <p>Arrastra fotos aquí o haz clic</p>
+                                    <small>Máx 6 imágenes (JPG, PNG, WEBP)</small>
+                                </div>
+                                <input type="file" id="gallery-upload-input" multiple
+                                    accept="image/jpeg,image/png,image/webp" style="display:none">
+                            </div>
+
+                            <div class="gallery-preview-grid" id="gallery-preview-list"></div>
+
+                            <div class="gallery-stats">
+                                <span id="gallery-count">0</span>/6 imágenes
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Diseño -->
+                <div class="tab-panel" id="design-panel">
+                    <div id="effectsTabMount"></div>
+
+                    <!-- ========== SECCIÓN: EFECTOS ========== -->
+                    <div class="design-section">
+                        <h3 class="design-section-title">✨ Efectos</h3>
+                        <div class="design-section-content">
+                            <div id="effects-grid" class="effects-grid-2col"></div>
+
+                            <!-- Panel de configuración por efecto (se muestra al seleccionar un efecto) -->
+                            <div id="effect-individual-config" class="effect-individual-config" style="display: none;">
+                                <h4 class="effect-config-title">⚙️ Configuración de <span
+                                        id="current-effect-name"></span>
+                                </h4>
+                                <div id="effect-controls-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tab Contenido -->
+                <div class="tab-panel" id="content-panel">
+                    <div class="control-group">
+                        <label class="control-label">Mensaje de Bienvenida</label>
+                        <textarea id="welcomeMessage" class="control-input" rows="3"
+                            placeholder="Ej: Con mucho amor te invitamos a celebrar..."></textarea>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Mensaje Principal</label>
+                        <textarea id="mainMessage" class="control-input" rows="4"
+                            placeholder="Describe los detalles de tu evento"></textarea>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Código de Vestimenta</label>
+                        <textarea id="dressCode" class="control-input" rows="2"
+                            placeholder="Ej: Formal, Casual elegante"></textarea>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Contacto para Confirmar</label>
+                        <input type="tel" id="confirmPhone" class="control-input" placeholder="Ej: +52 123 456 7890">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Mensaje de Despedida</label>
+                        <textarea id="closingMessage" class="control-input" rows="2"
+                            placeholder="Ej: ¡Esperamos contar con tu presencia!"></textarea>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Hashtag del Evento</label>
+                        <input type="text" id="eventHashtag" class="control-input" placeholder="Ej: #MisXV2026">
+                    </div>
+                </div>
+
+                <!-- Tab Multimedia -->
+                <div class="tab-panel" id="media-panel">
+                    <div class="control-group">
+                        <label class="control-label"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            Imagen de Fondo
+                            <button type="button" class="btn-delete-media" data-target="backgroundImage"
+                                title="Eliminar archivo"
+                                style="background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s;"
+                                onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</button>
+                        </label>
+                        <input type="file" id="backgroundImage" class="control-file" accept="image/*">
+                        <small class="control-hint">Formatos: JPG, PNG, WebP (Max 2MB)</small>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            Video de Fondo
+                            <button type="button" class="btn-delete-media" data-target="backgroundVideo"
+                                title="Eliminar archivo"
+                                style="background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s;"
+                                onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</button>
+                        </label>
+                        <input type="file" id="backgroundVideo" class="control-file" accept="video/*">
+                        <small class="control-hint">Formatos: MP4, WebM (Max 5MB)</small>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            Imagen de(los) Festejado(s)
+                            <button type="button" class="btn-delete-media" data-target="honoredPhoto"
+                                title="Eliminar archivo"
+                                style="background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s;"
+                                onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</button>
+                        </label>
+                        <input type="file" id="honoredPhoto" class="control-file" accept="image/*">
+                        <small class="control-hint">Foto principal (Max 1MB)</small>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            Música de Fondo
+                            <button type="button" class="btn-delete-media" data-target="backgroundMusic"
+                                title="Eliminar archivo"
+                                style="background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s;"
+                                onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</button>
+                        </label>
+                        <input type="file" id="backgroundMusic" class="control-file" accept="audio/*">
+                        <small class="control-hint">Formatos: MP3, WAV, OGG (Max 3MB)</small>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            Nota de Audio
+                            <button type="button" class="btn-delete-media" data-target="audioNote"
+                                title="Eliminar archivo"
+                                style="background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s;"
+                                onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</button>
+                        </label>
+                        <input type="file" id="audioNote" class="control-file" accept="audio/*">
+                        <small class="control-hint">Mensaje de voz personalizado</small>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label checkbox-label">
+                            <input type="checkbox" id="autoplayMusic" checked>
+                            <span>Reproducir música automáticamente</span>
+                        </label>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label checkbox-label">
+                            <input type="checkbox" id="loopMusic" checked>
+                            <span>Repetir música en bucle</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tab Interactivo -->
+                <div class="tab-panel" id="interactive-panel">
+                    <div class="control-group" id="countdownContainer">
+                        <label class="control-label checkbox-label">
+                            <input type="checkbox" id="enableCountdown" checked>
+                            <span>Habilitar Cuenta Regresiva</span>
+                        </label>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Texto de Cuenta Regresiva</label>
+                        <input type="text" id="countdownText" class="control-input" value="Faltan para el gran día:"
+                            placeholder="Texto antes del contador">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label checkbox-label">
+                            <input type="checkbox" id="enableQR" checked>
+                            <span>Generar Código QR</span>
+                        </label>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">URL para QR</label>
+                        <input type="url" id="qrURL" class="control-input" placeholder="https://maps.google.com/...">
+                        <small class="control-hint">Link para confirmación o ubicación</small>
+                    </div>
+
+                    <div class="control-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label class="control-label checkbox-label" style="margin-bottom: 0;">
+                                <input type="checkbox" id="enableMap" checked>
+                                <span>Mostrar Mapa del Lugar</span>
+                            </label>
+                            <button type="button" id="mapSearchBtn" class="btn-icon"
+                                title="Buscar ubicación inteligente"
+                                style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0 4px;">
+                                🗺️
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Coordenadas del Lugar</label>
+                        <input type="text" id="mapCoords" class="control-input" placeholder="19.4326, -99.1332">
+                        <small class="control-hint">Latitud, Longitud</small>
+                    </div>
+
+                    <div class="control-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label class="control-label checkbox-label" style="margin-bottom: 0;">
+                                <input type="checkbox" id="enableRSVP">
+                                <span>Habilitar Confirmación de Asistencia</span>
+                            </label>
+                            <button type="button" id="rsvpHelpBtn" class="btn-icon"
+                                title="Ayuda: Cómo crear formulario RSVP"
+                                style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0 4px;">
+                                ℹ️
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">URL de Formulario RSVP</label>
+                        <input type="url" id="rsvpURL" class="control-input" placeholder="https://forms.google.com/...">
+                        <small class="control-hint">Link a Google Forms u otro formulario</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área de Vista Previa -->
+        <!-- Área de Vista Previa (Centro) -->
+        <main class="preview-area">
+            <div class="device-frame" id="canvasFrame">
+                <div class="device-screen mobile-mode" id="deviceScreen">
+                    <canvas id="effects-canvas" class="effects-canvas"></canvas>
+                    <iframe id="previewFrame" title="Vista previa de la invitación"></iframe>
+                </div>
+            </div>
+        </main>
+
+        <!-- Toggle Button for Right Sidebar (tablet/mobile) -->
+        <button class="right-sidebar-toggle" id="rightSidebarToggle" aria-label="Abrir panel de propiedades" title="Panel de propiedades">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 3h6v18h-6M9 21H3V3h6M12 3v18"/>
+            </svg>
+        </button>
+
+        <!-- Barra Lateral Derecha -->
+        <aside class="right-sidebar" id="rightSidebar">
+            <div class="right-sidebar-panel is-minimal" id="visualEditorPanel">
+                <div class="ve-properties-pane" id="vePropertiesPane">
+                    <h3 class="panel-title">Estilo</h3>
+
+                    <div class="preview-info-card" id="veNoSelection">
+                        <span class="info-icon">🖱️</span>
+                        <p>Haz clic en un elemento de la vista previa para editarlo.</p>
+                    </div>
+
+                    <div id="veControls" style="display: none;">
+                        <div class="right-sidebar-grid-2">
+                            <div class="control-group">
+                                <label class="control-label">ID</label>
+                                <input type="text" id="veSelectedId" class="control-input" readonly>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label checkbox-label">
+                                    <input type="checkbox" id="veSnappingEnabled" checked>
+                                    <span>Snapping</span>
+                                </label>
+                                <small class="control-hint">Alt desactiva snapping temporalmente al arrastrar</small>
+                            </div>
+                        </div>
+
+                        <div id="veContextPanel"></div>
+
+                        <div class="control-group">
+                            <label class="control-label">Posición (X, Y)</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <input type="number" id="vePosX" class="control-input" step="1">
+                                <input type="number" id="vePosY" class="control-input" step="1">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Tamaño (W, H)</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <input type="number" id="veSizeW" class="control-input" step="1" min="1">
+                                <input type="number" id="veSizeH" class="control-input" step="1" min="1">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Capa (z-index)</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <input type="number" id="veZIndex" class="control-input" step="1">
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" id="veZUp" class="btn btn-secondary"
+                                        style="flex: 1;">▲</button>
+                                    <button type="button" id="veZDown" class="btn btn-secondary"
+                                        style="flex: 1;">▼</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Opacidad</label>
+                            <input type="range" id="veOpacity" class="control-range" min="0" max="100" value="100">
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Relleno</label>
+                            <div class="segmented" id="veFillModeButtons" role="group" aria-label="Modo de relleno">
+                                <button type="button" class="segmented-btn" id="veFillModeSolid">Color</button>
+                                <button type="button" class="segmented-btn" id="veFillModeGradient">Degradado</button>
+                                <button type="button" class="segmented-btn" id="veFillModeTexture">Textura</button>
+                                <button type="button" class="segmented-btn" id="veFillModeNone">Ninguno</button>
+                            </div>
+                            <select id="veFillType" class="control-input">
+                                <option value="none">Ninguno</option>
+                                <option value="solid">Color</option>
+                                <option value="gradient">Degradado</option>
+                                <option value="texture">Textura</option>
+                            </select>
+                            <div id="veFillSolidRow" style="margin-top: 10px; display: none;">
+                                <input type="color" id="veFillColor" class="control-input" value="#ffffff">
+                            </div>
+                            <div id="veFillGradientRow" style="margin-top: 10px; display: none;">
+                                <input type="text" id="veFillGradient" class="control-input"
+                                    placeholder="linear-gradient(...)">
+                                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                    <button type="button" id="veUseAdvancedGradient" class="btn btn-secondary"
+                                        style="flex: 1;">Usar degradado</button>
+                                    <button type="button" id="veClearFill" class="btn btn-secondary"
+                                        style="flex: 1;">Limpiar</button>
+                                </div>
+                            </div>
+                            <div id="veFillTextureRow" style="margin-top: 10px; display: none;">
+                                <select id="veTexturePreset" class="control-input"></select>
+                                <div
+                                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                    <input type="number" id="veTextureScale" class="control-input" step="0.1" min="0.1"
+                                        value="1">
+                                    <select id="veTextureRepeat" class="control-input">
+                                        <option value="repeat">Repetir</option>
+                                        <option value="no-repeat">No repetir</option>
+                                        <option value="repeat-x">Repetir X</option>
+                                        <option value="repeat-y">Repetir Y</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="veUnifiedVisualMount"></div>
+
+                        <div class="control-group animate-group" id="veTextControlsGroup">
+                            <label class="control-label">Texto</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <input type="color" id="veTextColor" class="control-input" value="#333333">
+                                <button type="button" id="veUseAdvancedTextGradient"
+                                    class="btn btn-secondary">Degradado</button>
+                            </div>
+                            <input type="text" id="veTextGradient" class="control-input"
+                                placeholder="linear-gradient(...)" style="margin-top: 10px;">
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Borde</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <input type="number" id="veBorderWidth" class="control-input" step="1" min="0"
+                                    value="0">
+                                <input type="color" id="veBorderColor" class="control-input" value="#000000">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                <select id="veBorderStyle" class="control-input">
+                                    <option value="solid">Sólido</option>
+                                    <option value="dashed">Dashed</option>
+                                    <option value="dotted">Dotted</option>
+                                    <option value="double">Double</option>
+                                </select>
+                                <input type="number" id="veBorderRadius" class="control-input" step="1" min="0"
+                                    value="0" placeholder="Radio">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label checkbox-label">
+                                <input type="checkbox" id="veShadowEnabled">
+                                <span>Sombra</span>
+                            </label>
+                            <div id="veShadowControls" style="display: none; margin-top: 10px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <input type="number" id="veShadowX" class="control-input" step="1" value="0">
+                                    <input type="number" id="veShadowY" class="control-input" step="1" value="6">
+                                </div>
+                                <div
+                                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                    <input type="number" id="veShadowBlur" class="control-input" step="1" min="0"
+                                        value="16">
+                                    <input type="number" id="veShadowSpread" class="control-input" step="1" value="0">
+                                </div>
+                                <div
+                                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                    <input type="color" id="veShadowColor" class="control-input" value="#000000">
+                                    <input type="range" id="veShadowOpacity" class="control-range" min="0" max="100"
+                                        value="35">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Efectos</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <input type="number" id="veFilterBlur" class="control-input" step="1" min="0" value="0"
+                                    placeholder="Blur px">
+                                <input type="number" id="veFilterGrayscale" class="control-input" step="1" min="0"
+                                    max="100" value="0" placeholder="Grayscale %">
+                            </div>
+                        </div>
+
+                        <div class="preview-actions-stack">
+                            <button type="button" id="veHide" class="btn btn-secondary btn-block">Ocultar</button>
+                            <button type="button" id="veShow" class="btn btn-secondary btn-block">Mostrar</button>
+                        </div>
+                    </div>
+
+                    <div id="globalStylePanel"></div>
+                </div>
+
+                <div class="ve-layers-pane" id="veLayersPane">
+                    <div class="sidebar-group" id="layersGroup">
+                        <!-- Layers Header Removed -->
+                        <div class="sidebar-group-body" id="layersBody" role="region" aria-label="Lista de capas">
+                            <div class="layers-list" id="layersList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div class="floating-modal" id="advancedFillModal" role="dialog" aria-label="Relleno Avanzado" hidden>
+        <div class="floating-modal-header" id="advancedFillHeader">
+            <div class="floating-modal-title">Relleno Avanzado</div>
+            <div class="floating-modal-header-actions">
+                <button type="button" class="tool-btn" id="advancedFillPinBtn" aria-label="Fijar"
+                    title="Fijar">📌</button>
+                <button type="button" class="tool-btn" id="advancedFillDockBtn" aria-label="Adosar"
+                    title="Adosar">⫶</button>
+                <button type="button" class="tool-btn" id="advancedFillCloseBtn" aria-label="Cerrar"
+                    title="Cerrar">✕</button>
+            </div>
+        </div>
+        <div class="history-filters" style="margin-top: 4px; margin-bottom: 16px;">
+            <div class="segmented" role="tablist" aria-label="Secciones de relleno" style="width: 96%; margin: 0 auto;">
+                <button type="button" class="segmented-btn active" role="tab" aria-selected="true"
+                    aria-controls="afColors" id="afTabColors" aria-label="Colores" data-tooltip="Colores">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path
+                            d="M12 3a9 9 0 0 0 0 18c7 0 9-4 9-4-1.12 0-2-.82-2-2 0-1.12.82-2 2-2a2 2 0 0 0 2-2c0-4.42-3.58-8-8-8zm-4 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-2.5 6a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm13-1a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-9 6a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z" />
+                    </svg>
+                </button>
+                <button type="button" class="segmented-btn" role="tab" aria-selected="false" aria-controls="afGradients"
+                    id="afTabGradients" aria-label="Degradados Avanzados" data-tooltip="Degradados Avanzados">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path
+                            d="M11 9h2v2h-2zm-2 2h2v2H9zm4 0h2v2h-2zm2-2h2v2h-2zM7 9h2v2H7zm12-6H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 18H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm2-7h-2v2h2v2h-2v-2h-2v2h-2v-2h-2v2H9v-2H7v2H5v-2h2v-2H5V5h14v6z" />
+                    </svg>
+                </button>
+                <button type="button" class="segmented-btn" role="tab" aria-selected="false" aria-controls="afMetallic"
+                    id="afTabMetallic" aria-label="Degradados Metalicos Premium" data-tooltip="Degradados Metalicos">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z" />
+                    </svg>
+                </button>
+                <button type="button" class="segmented-btn" role="tab" aria-selected="false" aria-controls="afTextures"
+                    id="afTabTextures" aria-label="Texturas" data-tooltip="Texturas">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path
+                            d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="floating-modal-body">
+            <div class="floating-tab-panel active" role="tabpanel" id="afColors" aria-labelledby="afTabColors">
+                <div class="control-group">
+                    <label class="control-label">Color</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="color" id="afSolidColor" class="control-input" value="#ffffff"
+                            aria-label="Color sólido">
+                        <input type="range" id="afSolidOpacity" class="control-range" min="0" max="100" value="100"
+                            aria-label="Opacidad">
+                    </div>
+                </div>
+                <small class="control-hint">Aplica automáticamente al elemento seleccionado</small>
+            </div>
+
+            <div class="floating-tab-panel" role="tabpanel" id="afGradients" aria-labelledby="afTabGradients" hidden>
+                <div class="control-group">
+                    <label class="control-label">Tipo</label>
+                    <div class="segmented" role="group" aria-label="Tipo de degradado">
+                        <button type="button" class="segmented-btn active" data-af-grad-type="linear">Lineal</button>
+                        <button type="button" class="segmented-btn" data-af-grad-type="radial">Radial</button>
+                        <button type="button" class="segmented-btn" data-af-grad-type="conic">Conical</button>
+                    </div>
+                </div>
+                <div class="control-group" id="afAngleRow">
+                    <label class="control-label">Ángulo</label>
+                    <input type="range" id="afGradientAngle" class="control-range" min="0" max="360" value="135">
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Vista previa</label>
+                    <canvas id="afGradientPreview" width="360" height="90"
+                        style="width: 100%; border-radius: 10px; border: 1px solid rgba(148,163,184,0.22);"></canvas>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Editor visual</label>
+                    <div class="af-stopbar" id="afStopBar" role="application" aria-label="Barra de paradas">
+                        <div class="af-stopbar-track" id="afStopBarTrack"></div>
+                    </div>
+                    <div class="af-stop-editor" id="afStopEditor">
+                        <input type="color" id="afStopColor" class="control-input" aria-label="Color de la parada">
+                        <input type="range" id="afStopOpacity" class="control-range" min="0" max="100" value="100"
+                            aria-label="Opacidad de la parada">
+                        <button type="button" class="btn btn-secondary" id="afRemoveStop">Eliminar parada</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Paradas</label>
+                    <div id="afStops"></div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button type="button" class="btn btn-secondary" id="afAddStop">Añadir parada</button>
+                        <button type="button" class="btn btn-secondary" id="afResetGradient">Reset</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Presets personalizados</label>
+                    <div class="af-preset-save-row" style="display:grid; grid-template-columns: 1fr auto; gap:10px;">
+                        <input type="text" id="afPresetName" class="control-input" placeholder="Nombre del preset...">
+                        <button type="button" class="btn btn-secondary" id="afPresetSave">Guardar</button>
+                    </div>
+                    <div id="afPresetList" style="margin-top:10px;"></div>
+                </div>
+            </div>
+
+            <div class="floating-tab-panel" role="tabpanel" id="afMetallic" aria-labelledby="afTabMetallic" hidden>
+                <div class="control-group">
+                    <label class="control-label">Presets</label>
+                    <div id="afMetallicGrid" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="floating-tab-panel" role="tabpanel" id="afTextures" aria-labelledby="afTabTextures" hidden>
+                <div class="control-group">
+                    <label class="control-label">Galería</label>
+                    <div id="afTextureGrid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Escala</label>
+                    <input type="range" id="afTextureScale" class="control-range" min="0.2" max="4" step="0.1"
+                        value="1">
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Repetición</label>
+                    <select id="afTextureRepeat" class="control-input">
+                        <option value="repeat">Repetir</option>
+                        <option value="no-repeat">No repetir</option>
+                        <option value="repeat-x">Repetir X</option>
+                        <option value="repeat-y">Repetir Y</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Subir textura</label>
+                    <input type="file" id="afTextureUpload" class="control-file" accept="image/*">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Exportación -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Exportar Invitación</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Tu invitación será descargada como un paquete ZIP que incluye:</p>
+                <ul class="export-list">
+                    <li>✅ Archivo HTML listo para publicar</li>
+                    <li>✅ Estilos CSS optimizados</li>
+                    <li>✅ JavaScript para funcionalidades interactivas</li>
+                    <li>✅ Todas las imágenes y multimedia</li>
+                </ul>
+                <div class="export-options">
+                    <label class="control-label checkbox-label">
+                        <input type="checkbox" id="minifyCode" checked>
+                        <span>Minificar código (reduce tamaño)</span>
+                    </label>
+                    <label class="control-label checkbox-label">
+                        <input type="checkbox" id="optimizeImages" checked>
+                        <span>Optimizar imágenes</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelExport" class="btn btn-secondary">Cancelar</button>
+                <button id="confirmExport" class="btn btn-accent">Descargar ZIP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Plantillas -->
+    <div id="templatesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Abrir plantilla</h2>
+                <button class="modal-close" id="templatesModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="control-group">
+                    <label class="control-label">Buscar</label>
+                    <input type="text" id="templatesSearch" class="control-input"
+                        placeholder="Nombre de la plantilla...">
+                </div>
+                <div id="templatesList"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="templatesModalCancel" class="btn btn-secondary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Guardar Plantilla -->
+    <div id="templateSaveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Guardar plantilla</h2>
+                <button class="modal-close" id="templateSaveModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="control-group">
+                    <label class="control-label">Nombre</label>
+                    <input type="text" id="templateSaveName" class="control-input" placeholder="Ej: Boda elegante">
+                    <small class="control-hint">Se guardará como JSON para reabrir y editar después.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="templateSaveCancel" class="btn btn-secondary">Cancelar</button>
+                <button id="templateSaveConfirm" class="btn btn-accent">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Ayuda -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="helpModalTitle">Ayuda</h2>
+                <button class="modal-close" id="helpModalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="helpModalBody"></div>
+            <div class="modal-footer">
+                <button id="helpModalOk" class="btn btn-secondary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Búsqueda Mapa -->
+    <div id="mapSearchModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; width: 90%;">
+            <div class="modal-header">
+                <h2>Búsqueda Manual de Ubicación</h2>
+                <button class="modal-close" id="mapSearchClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem;">Busca y selecciona la notificación exacta en el mapa:</p>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="text" id="mapSearchInput" class="control-input" placeholder="Buscar lugar..."
+                        style="flex: 1;">
+                    <button id="mapSearchActionBtn" class="btn btn-primary" style="padding: 0 1rem;">Buscar</button>
+                </div>
+                <div id="mapSearchContainer"
+                    style="height: 300px; background: #eee; border-radius: 8px; overflow: hidden; position: relative;">
+                    <div id="mapSearchGoogleContainer" style="width: 100%; height: 100%;"></div>
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                    Haz click en el mapa para situar el marcador.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="mapSearchCancel" class="btn btn-secondary">Cancelar</button>
+                <button id="mapSearchConfirm" class="btn btn-accent">Confirmar Ubicación</button>
+            </div>
+        </div>
+        <!-- Modal Confirmación Eliminación Multimedia -->
+        <div id="mediaDeleteModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Confirmar Eliminación</h2>
+                    <button class="modal-close" id="mediaDeleteClose">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Está seguro de eliminar este archivo? Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="mediaDeleteCancel" class="btn btn-secondary">No, cancelar</button>
+                    <button id="mediaDeleteConfirm" class="btn btn-accent">Sí, eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmación Reemplazo de Fondo -->
+    <div id="backgroundReplaceModal" class="modal" role="dialog" aria-labelledby="backgroundReplaceTitle"
+        aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="backgroundReplaceTitle">Confirmar Reemplazo de Fondo</h2>
+                <button class="modal-close" id="backgroundReplaceClose" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="backgroundReplaceMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="backgroundReplaceCancel" class="btn btn-secondary">No, cancelar</button>
+                <button id="backgroundReplaceConfirm" class="btn btn-accent">Sí, reemplazar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ayuda RSVP -->
+    <div id="rsvpHelpModal" class="modal" role="dialog" aria-labelledby="rsvpHelpTitle" aria-modal="true">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2 id="rsvpHelpTitle">📋 Cómo Crear un Formulario de Confirmación de Asistencia</h2>
+                <button class="modal-close" id="rsvpHelpClose" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div style="padding: 1rem;">
+                    <!-- Paso 1 -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="color: var(--accent-color); margin-bottom: 0.5rem;">
+                            <span
+                                style="background: var(--accent-color); color: white; border-radius: 50%; padding: 0.25rem 0.6rem; margin-right: 0.5rem; font-size: 0.9rem;">1</span>
+                            Accede a Google Forms
+                        </h3>
+                        <p style="margin-left: 2.5rem; line-height: 1.6;">
+                            Haz clic en el siguiente enlace para crear un nuevo formulario:
+                        </p>
+                        <a href="https://forms.google.com/create" target="_blank" rel="noopener noreferrer"
+                            style="display: inline-block; margin-left: 2.5rem; padding: 0.75rem 1.5rem; background: #4285f4; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; transition: background 0.3s;">
+                            🔗 Abrir Google Forms
+                        </a>
+                    </div>
+
+                    <!-- Paso 2 -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="color: var(--accent-color); margin-bottom: 0.5rem;">
+                            <span
+                                style="background: var(--accent-color); color: white; border-radius: 50%; padding: 0.25rem 0.6rem; margin-right: 0.5rem; font-size: 0.9rem;">2</span>
+                            Configura tu Formulario
+                        </h3>
+                        <p style="margin-left: 2.5rem; line-height: 1.6; margin-bottom: 0.75rem;">
+                            Dale un título descriptivo como "Confirmación de Asistencia - [Nombre del Evento]" y agrega
+                            los siguientes campos recomendados:
+                        </p>
+                        <ul style="margin-left: 3.5rem; line-height: 1.8;">
+                            <li><strong>Nombre completo</strong> (Respuesta corta, obligatorio)</li>
+                            <li><strong>Correo electrónico</strong> (Respuesta corta, obligatorio)</li>
+                            <li><strong>Teléfono</strong> (Respuesta corta, opcional)</li>
+                            <li><strong>¿Confirmas tu asistencia?</strong> (Opción múltiple: Sí/No, obligatorio)</li>
+                            <li><strong>Número de acompañantes</strong> (Respuesta corta o lista desplegable, opcional)
+                            </li>
+                            <li><strong>Restricciones alimentarias</strong> (Párrafo, opcional)</li>
+                            <li><strong>Mensaje para los anfitriones</strong> (Párrafo, opcional)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Paso 3 -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="color: var(--accent-color); margin-bottom: 0.5rem;">
+                            <span
+                                style="background: var(--accent-color); color: white; border-radius: 50%; padding: 0.25rem 0.6rem; margin-right: 0.5rem; font-size: 0.9rem;">3</span>
+                            Personaliza el Diseño
+                        </h3>
+                        <p style="margin-left: 2.5rem; line-height: 1.6;">
+                            Haz clic en el icono de paleta 🎨 en la parte superior para elegir colores y temas que
+                            combinen con tu invitación.
+                        </p>
+                    </div>
+
+                    <!-- Paso 4 -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="color: var(--accent-color); margin-bottom: 0.5rem;">
+                            <span
+                                style="background: var(--accent-color); color: white; border-radius: 50%; padding: 0.25rem 0.6rem; margin-right: 0.5rem; font-size: 0.9rem;">4</span>
+                            Obtén el Enlace del Formulario
+                        </h3>
+                        <p style="margin-left: 2.5rem; line-height: 1.6; margin-bottom: 0.5rem;">
+                            Una vez que hayas terminado de configurar tu formulario:
+                        </p>
+                        <ol style="margin-left: 3.5rem; line-height: 1.8;">
+                            <li>Haz clic en el botón <strong>"Enviar"</strong> en la esquina superior derecha</li>
+                            <li>En la ventana emergente, selecciona el icono de <strong>enlace</strong> 🔗</li>
+                            <li>Opcionalmente, marca la casilla <strong>"Acortar URL"</strong> para un enlace más corto
+                            </li>
+                            <li>Haz clic en <strong>"Copiar"</strong> para copiar el enlace</li>
+                        </ol>
+                    </div>
+
+                    <!-- Paso 5 -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="color: var(--accent-color); margin-bottom: 0.5rem;">
+                            <span
+                                style="background: var(--accent-color); color: white; border-radius: 50%; padding: 0.25rem 0.6rem; margin-right: 0.5rem; font-size: 0.9rem;">5</span>
+                            Integra el Enlace en tu Invitación
+                        </h3>
+                        <p style="margin-left: 2.5rem; line-height: 1.6;">
+                            Pega el enlace copiado en el campo <strong>"URL de Formulario RSVP"</strong> de esta
+                            aplicación. El enlace se agregará automáticamente a tu invitación como un botón de
+                            confirmación.
+                        </p>
+                    </div>
+
+                    <!-- Consejos adicionales -->
+                    <div
+                        style="background: #f0f7ff; border-left: 4px solid #4285f4; padding: 1rem; border-radius: 4px; margin-top: 1.5rem;">
+                        <h4 style="color: #1967d2; margin-bottom: 0.5rem;">💡 Consejos Adicionales</h4>
+                        <ul style="margin-left: 1.5rem; line-height: 1.8; color: #333;">
+                            <li>Activa la opción "Recopilar direcciones de correo electrónico" en la configuración del
+                                formulario</li>
+                            <li>Configura un mensaje de confirmación personalizado que se mostrará después de enviar el
+                                formulario</li>
+                            <li>Puedes ver las respuestas en tiempo real desde la pestaña "Respuestas" de Google Forms
+                            </li>
+                            <li>Considera crear una hoja de cálculo vinculada para organizar mejor las respuestas</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="rsvpHelpOk" class="btn btn-accent">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Historia -->
+    <div class="floating-modal" id="historyPanel" role="dialog" aria-label="Historia" hidden>
+        <div class="floating-modal-header" id="historyPanelHeader">
+            <div class="floating-modal-title">📜 Historia</div>
+            <div class="floating-modal-header-actions">
+                <button type="button" class="tool-btn" id="historyPanelClearBtn" aria-label="Limpiar historial"
+                    title="Limpiar historial">🗑️</button>
+                <button type="button" class="tool-btn" id="historyPanelPinBtn" aria-label="Fijar"
+                    title="Fijar">📌</button>
+                <button type="button" class="tool-btn" id="historyPanelDockBtn" aria-label="Adosar"
+                    title="Adosar">⫶</button>
+                <button type="button" class="tool-btn" id="historyPanelCloseBtn" aria-label="Cerrar"
+                    title="Cerrar">✕</button>
+            </div>
+        </div>
+        <div class="floating-modal-body" style="padding: 16px;">
+            <!-- Botones de filtro -->
+            <div class="history-filters" style="margin-bottom: 16px;">
+                <div class="segmented" role="group" aria-label="Filtrar acciones">
+                    <button type="button" class="segmented-btn active" data-hp-filter="all" aria-label="Todas"
+                        data-tooltip="Todas">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path
+                                d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+                        </svg>
+                    </button>
+                    <button type="button" class="segmented-btn" data-hp-filter="element" aria-label="Elementos"
+                        data-tooltip="Elementos">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path
+                                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z" />
+                            <path d="M11 7h2v10h-2zm-4 4h10v2H7z" />
+                        </svg>
+                    </button>
+                    <button type="button" class="segmented-btn" data-hp-filter="property" aria-label="Propiedades"
+                        data-tooltip="Propiedades">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path
+                                d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z" />
+                        </svg>
+                    </button>
+                    <button type="button" class="segmented-btn" data-hp-filter="transform" aria-label="Transformaciones"
+                        data-tooltip="Transformaciones">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M12 2L8 6h3v5H6V8L2 12l4 4v-3h5v5H8l4 4 4-4h-3v-5h5v3l4-4-4-4v3h-5V6h3L12 2z" />
+                        </svg>
+                    </button>
+                    <button type="button" class="segmented-btn" data-hp-filter="color" aria-label="Colores"
+                        data-tooltip="Colores">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path
+                                d="M12 3a9 9 0 0 0 0 18c7 0 9-4 9-4-1.12 0-2-.82-2-2 0-1.12.82-2 2-2a2 2 0 0 0 2-2c0-4.42-3.58-8-8-8zm-4 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-2.5 6a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm13-1a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-9 6a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shortcuts de atajos -->
+            <div class="history-shortcuts"
+                style="display: flex; gap: 8px; margin-bottom: 16px; padding: 12px; background: rgba(148,163,184,0.1); border-radius: 8px; font-size: 13px;">
+                <div style="flex: 1; text-align: center;">
+                    <strong>Deshacer:</strong> <kbd
+                        style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 11px;">Ctrl+Z</kbd>
+                </div>
+                <div style="flex: 1; text-align: center;">
+                    <strong>Rehacer:</strong> <kbd
+                        style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 11px;">Ctrl+Y</kbd>
+                </div>
+            </div>
+
+            <!-- Estado vacío -->
+            <div id="historyEmptyState" class="history-empty-state" hidden>
+                <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.5);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+                    <div style="font-size: 14px;">No hay acciones en el historial</div>
+                    <div style="font-size: 12px; margin-top: 8px;">Realiza cambios en el canvas para ver el historial
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indicador de estado actual -->
+            <div id="historyCurrentStateIndicator" hidden></div>
+
+            <!-- Lista de historial -->
+            <div id="historyList" class="history-list" role="list" aria-label="Lista de acciones"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/moment.min.js"></script>
+    <script>if (window.moment) moment.locale('es');</script>
+    <script src="js/image-optimizer.js"></script>
+    <script src="js/media-persistence-manager.js"></script>
+    <script src="js/rsvp-help-modal.js"></script>
+    <script src="js/responsive-centering-manager.js"></script>
+    <!-- Security: Sanitization module (must load before other scripts) -->
+    <script src="js/sanitize.js"></script>
+    <!-- Utility functions (must load before other scripts) -->
+    <script src="js/utils.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/history-dropdown.js"></script>
+    <script src="js/history-manager.js"></script>
+    <script src="js/history-panel.js"></script>
+    <!-- Diagnostics for debugging history dropdown (optional - remove in production) -->
+    <script src="js/history-dropdown-diagnostics.js"></script>
+    <!-- History Deduplication System -->
+    <script src="js/history-deduplication-cleanup.js"></script>
+    <script src="js/tests/history-deduplication-tests.js"></script>
+    <script src="js/dynamic-elements-manager.js"></script>
+    <script src="js/tests/persistence-logging-test.js"></script>
+    <!-- <script src="js/tests/media-cleanup-test.js"></script> -->
+    <script src="js/tests/image-optimizer-test.js"></script>
+    <script src="js/tests/background-exclusivity-test.js"></script>
+    <script src="js/tests/media-persistence-test.js"></script>
+    <script src="js/tests/countdown-visibility-test.js"></script>
+    <script src="js/tests/accordion-navigation-test.js"></script>
+    <script src="js/tests/accordion-accessibility-enhanced-test.js"></script>
+    <script src="js/tests/accordion-redesign-test.js"></script>
+    <!-- Layer Manager System (Legacy - Replaced by Visual Editor) -->
+    <!-- <script src="js/layer-store.js"></script>
+    <script src="js/layer-sync.js"></script>
+    <script src="js/layer-manager.js"></script> -->
+    <!-- Enhanced Realtime Layer Sync System (Legacy - Replaced by Visual Editor) -->
+    <!-- <script src="js/enhanced-layer-realtime-sync.js"></script> -->
+    <!-- <script src="js/tests/layer-manager-test.js"></script>
+    <script src="js/tests/enhanced-layer-sync-test.js"></script> -->
+    <script src="js/tests/media-delete-test.js"></script>
+    <script src="js/tests/rsvp-help-modal-test.js"></script>
+    <script src="js/tests/conditional-visibility-test.js"></script>
+    <script src="js/tests/selection-box-test.js"></script>
+    <script src="js/tests/responsive-centering-test.js"></script>
+    <script src="js/tests/toolbar-buttons-test.js"></script>
+    <!-- Preview modular files (deben cargarse después de preview.js) -->
+    <script src="js/preview-core.js"></script>
+    <script src="js/preview-styles.js"></script>
+    <script src="js/preview-gallery.js"></script>
+    <script src="js/preview-effects.js"></script>
+    <script src="js/preview.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/fonts.js"></script>
+    <!-- Sistema de configuración (debe cargarse antes de ui-enhancements) -->
+    <script src="js/settings-manager.js"></script>
+    <script src="js/ui-enhancements.js"></script>
+    <script src="js/qr-generator.js"></script>
+    <script src="js/style-manager.js"></script>
+    <!-- GOOGLE MAPS API - Reemplaza YOUR_API_KEY con tu clave real -->
+
+    <script src="js/map-search.js"></script>
+    <!-- Módulos de diseño avanzado -->
+    <script src="js/gradient-editor.js"></script>
+    <script src="js/texture-manager.js"></script>
+    <script src="js/advanced-effects.js?v=2.2"></script>
+    <script src="js/design-advanced-integrator.js?v=2.2"></script>
+    <!-- Scripts principales -->
+    <script src="js/export.js"></script>
+    <script src="js/accordion-menu.js"></script>
+    <script src="js/app-menu.js"></script>
+    <script src="js/canvas-controls.js"></script>
+    <script src="js/advanced-fill-modal.js"></script>
+    <script src="js/device-centering.js"></script>
+    <script src="js/gallery-manager.js"></script>
+    <script src="js/color-picker.js"></script>
+    <script src="js/color-picker-integrator.js"></script>
+    <script src="js/canvas-renderer.js"></script>
+    <script src="js/canvas-layer-integration.js"></script>
+    <!-- Editor modular files (deben cargarse antes de editor.js) -->
+    <script src="js/editor-core.js"></script>
+    <script src="js/editor-forms.js"></script>
+    <script src="js/editor-events.js"></script>
+    <script src="js/editor-validation.js"></script>
+    <script src="js/editor-media.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/visual-editor.js"></script>
+    <script src="js/template-manager.js"></script>
+    <script src="js/top-menu.js"></script>
+    <!-- Script para ajuste automático de vista previa -->
+    <script>
+        function adjustPreviewHeight() {
+            const deviceScreen = document.getElementById('deviceScreen');
+            if (!deviceScreen) return;
+
+            const frame = deviceScreen.closest('.device-frame');
+            if (!frame) return;
+
+            const availableHeight = window.innerHeight - frame.getBoundingClientRect().top - 40;
+            const aspectRatio = 16 / 9; // Proporción 16:9 para móvil vertical
+
+            let height = availableHeight;
+            let width = height * (9 / 16); // Invertido para vertical
+
+            // Si el ancho calculado excede el contenedor
+            const maxWidth = frame.offsetWidth - 40;
+            if (width > maxWidth) {
+                width = maxWidth;
+                height = width * (16 / 9);
+            }
+
+            deviceScreen.style.width = width + 'px';
+            deviceScreen.style.height = height + 'px';
+            deviceScreen.style.maxHeight = availableHeight + 'px';
+        }
+
+        // Ajustar al cargar y al redimensionar
+        window.addEventListener('load', adjustPreviewHeight);
+        window.addEventListener('resize', adjustPreviewHeight);
+
+        // Ajustar también cuando cambie el tamaño del panel
+        if (window.ResizeObserver) {
+            const observer = new ResizeObserver(adjustPreviewHeight);
+            const previewArea = document.querySelector('.preview-area');
+            if (previewArea) observer.observe(previewArea);
+        }
+    </script>
+
+    <script>
+        // Right Sidebar Toggle (tablet/mobile)
+        (function() {
+            const toggle = document.getElementById('rightSidebarToggle');
+            const sidebar = document.getElementById('rightSidebar');
+            if (!toggle || !sidebar) return;
+
+            toggle.addEventListener('click', () => {
+                sidebar.classList.toggle('is-open');
+                const isOpen = sidebar.classList.contains('is-open');
+                toggle.setAttribute('aria-label', isOpen ? 'Cerrar panel de propiedades' : 'Abrir panel de propiedades');
+            });
+
+            // Close on click outside
+            document.addEventListener('click', (e) => {
+                if (sidebar.classList.contains('is-open') &&
+                    !sidebar.contains(e.target) &&
+                    !toggle.contains(e.target)) {
+                    sidebar.classList.remove('is-open');
+                    toggle.setAttribute('aria-label', 'Abrir panel de propiedades');
+                }
+            });
+
+            // Close on escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                    sidebar.classList.remove('is-open');
+                    toggle.setAttribute('aria-label', 'Abrir panel de propiedades');
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

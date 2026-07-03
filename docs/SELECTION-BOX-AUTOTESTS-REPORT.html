@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Informe anotado — Autotest Recuadro de selección</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; padding: 16px; }
+    .wrap { max-width: 1100px; margin: 0 auto; }
+    .stage { position: relative; border: 1px solid #111827; border-radius: 12px; overflow: hidden; background: #0b1220; }
+    img { display: block; width: 100%; height: auto; }
+    svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .label { font-weight: 800; font-size: 16px; fill: #fff; }
+    .box { fill: rgba(255, 0, 0, 0.10); stroke: rgba(255, 0, 0, 0.85); stroke-width: 3; }
+    .box2 { fill: rgba(255, 165, 0, 0.10); stroke: rgba(255, 165, 0, 0.95); stroke-width: 3; }
+    .legend { margin-top: 14px; display: grid; gap: 8px; }
+    .item { border: 1px solid rgba(148,163,184,0.22); border-radius: 12px; padding: 12px; background: rgba(15,23,42,0.55); color: rgba(255,255,255,0.92); }
+    .item b { display: inline-block; min-width: 34px; }
+    code { background: rgba(148,163,184,0.16); padding: 2px 6px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Informe anotado — Autotest “Recuadro de selección”</h1>
+    <p>Coloca la captura como <code>selection-box-autotest-failure.png</code> en la raíz del proyecto y abre este archivo.</p>
+    <div class="stage">
+      <img src="./selection-box-autotest-failure.png" alt="Captura del fallo del autotest" />
+      <svg viewBox="0 0 1252 334" preserveAspectRatio="none" aria-hidden="true">
+        <rect class="box" x="12" y="92" width="520" height="30" rx="8"></rect>
+        <text class="label" x="20" y="114">A</text>
+        <rect class="box2" x="12" y="122" width="520" height="30" rx="8"></rect>
+        <text class="label" x="20" y="144">B</text>
+        <rect class="box" x="12" y="152" width="260" height="30" rx="8"></rect>
+        <text class="label" x="20" y="174">C</text>
+        <rect class="box" x="12" y="196" width="1228" height="96" rx="12"></rect>
+        <text class="label" x="20" y="222">D</text>
+      </svg>
+    </div>
+
+    <div class="legend">
+      <div class="item"><b>A</b> Falla de precondición: el test no encuentra el elemento seleccionado.</div>
+      <div class="item"><b>B</b> Señal engañosa: el recuadro “existe” aunque no haya selección válida.</div>
+      <div class="item"><b>C</b> Fallo general del bloque de tests (se aborta el flujo).</div>
+      <div class="item"><b>D</b> Excepción: <code>Cannot read properties of null (reading 'getBoundingClientRect')</code>.</div>
+    </div>
+  </div>
+</body>
+</html>
+

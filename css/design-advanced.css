@@ -1,0 +1,627 @@
+/* =====================================
+   DESIGN-ADVANCED.CSS - Estilos para Funcionalidades Avanzadas de Diseño
+   ===================================== */
+
+/* ===== EDITOR DE DEGRADADOS ===== */
+.gradient-editor-container {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    /* Reducido de lg a md para evitar desbordamiento en sidebar */
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+    /* Asegurar que padding no sume al ancho */
+    width: 100%;
+    overflow: hidden;
+    /* Cortar cualquier desbordamiento interno */
+}
+
+.gradient-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.gradient-editor-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.gradient-type-selector {
+    display: flex;
+    gap: var(--spacing-sm);
+    background: var(--bg-tertiary);
+    padding: 4px;
+    border-radius: var(--radius-md);
+}
+
+.gradient-type-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-normal);
+}
+
+.gradient-type-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.gradient-preview-container {
+    width: 100%;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--spacing-md);
+    border: 2px solid var(--border-color);
+    /* Borde visible y nítido */
+}
+
+.gradient-preview-canvas {
+    display: block;
+    width: 100%;
+    height: 120px;
+    /* Altura más precisa */
+    border-radius: var(--radius-md);
+    box-shadow: inset var(--shadow-sm);
+    /* Sombra interna para profundidad */
+}
+
+.gradient-stops-container {
+    margin: var(--spacing-md) 0;
+}
+
+.gradient-stop-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+        "color pos remove"
+        "opacity opacity opacity";
+    gap: var(--spacing-xs);
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+}
+
+.gradient-stop-color-preview {
+    grid-area: color;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border-color);
+}
+
+.gradient-stop-position {
+    grid-area: pos;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.gradient-stop-remove {
+    grid-area: remove;
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gradient-stop-opacity {
+    grid-area: opacity;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 4px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.gradient-stop-opacity::before {
+    content: '💧 Opacidad';
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.gradient-stop-opacity input {
+    flex: 1;
+    height: 4px !important;
+}
+
+.gradient-angle-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+    padding: var(--spacing-sm);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.gradient-angle-control label {
+    font-size: 0.85rem;
+    min-width: 60px;
+}
+
+.gradient-add-stop {
+    width: 100%;
+    padding: 0.6rem;
+    margin: var(--spacing-sm) 0;
+    border: 2px dashed var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all var(--transition-normal);
+}
+
+.gradient-add-stop:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(139, 92, 246, 0.05);
+}
+
+.gradient-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-md);
+}
+
+.gradient-action-btn {
+    padding: 0.6rem 0.4rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.gradient-action-btn.primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+}
+
+.gradient-action-btn.secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.gradient-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.gradient-angle-input {
+    flex: 1;
+    width: 100%;
+}
+
+/* ===== GALERÍA DE DEGRADADOS PREDEFINIDOS ===== */
+.gradient-presets-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+.gradient-preset-item {
+    position: relative;
+    height: 80px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-normal);
+    overflow: hidden;
+}
+
+.gradient-preset-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    transition: all var(--transition-normal);
+}
+
+.gradient-preset-item:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+.gradient-preset-item.selected {
+    border-color: var(--success-color);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+.gradient-preset-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+}
+
+/* Degradados predefinidos */
+.gradient-gold {
+    background: linear-gradient(135deg, #8B7500 0%, #FFD700 35%, #FFF4B3 65%, #FFD700 100%);
+}
+
+.gradient-silver {
+    background: linear-gradient(135deg, #989898 0%, #D3D3D3 35%, #F5F5F5 65%, #C0C0C0 100%);
+}
+
+.gradient-bronze {
+    background: linear-gradient(135deg, #804A00 0%, #CD7F32 35%, #E9B872 65%, #B87333 100%);
+}
+
+.gradient-roseGold {
+    background: linear-gradient(135deg, #B76E79 0%, #ECC5C0 35%, #F4E3E0 65%, #ECC5C0 100%);
+}
+
+.gradient-copper {
+    background: linear-gradient(135deg, #B87333 0%, #D99058 35%, #F0C9A6 65%, #C87533 100%);
+}
+
+.gradient-platinum {
+    background: linear-gradient(135deg, #8E8E93 0%, #E5E4E2 35%, #FFFFFF 65%, #D1D0CF 100%);
+}
+
+.gradient-titanium {
+    background: linear-gradient(135deg, #878681 0%, #C8C8C8 35%, #E8E8E8 65%, #B0B0B0 100%);
+}
+
+.gradient-champagne {
+    background: linear-gradient(135deg, #C2A661 0%, #F7E7CE 35%, #FAEBD7 65%, #E8D5B7 100%);
+}
+
+/* ===== SELECTOR DE TEXTURAS ===== */
+.texture-selector-container {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--border-color);
+}
+
+.texture-categories {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.texture-category-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.texture-category-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.texture-category-btn:hover {
+    border-color: var(--primary-color);
+}
+
+.texture-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: var(--spacing-sm);
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--bg-primary);
+}
+
+.texture-gallery::-webkit-scrollbar {
+    width: 8px;
+}
+
+.texture-gallery::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 4px;
+}
+
+.texture-gallery::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.texture-item {
+    position: relative;
+    height: 100px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-normal);
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+}
+
+.texture-item:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.texture-item.selected {
+    border-color: var(--success-color);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+.texture-item-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.25rem;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.texture-upload {
+    border: 2px dashed var(--border-color);
+    background: transparent;
+    padding: var(--spacing-lg);
+    text-align: center;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    margin: var(--spacing-md) 0;
+}
+
+.texture-upload:hover {
+    border-color: var(--primary-color);
+    background: rgba(139, 92, 246, 0.05);
+}
+
+.texture-upload-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.texture-upload-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.texture-properties {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.texture-property {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.texture-property label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.texture-property input[type="range"] {
+    width: 100%;
+}
+
+.texture-property select {
+    padding: 0.5rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+}
+
+/* ===== EFECTOS AVANZADOS ===== */
+.effects-advanced-container {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--border-color);
+}
+
+.effects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+.effect-card {
+    position: relative;
+    padding: var(--spacing-md);
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-align: center;
+    overflow: hidden;
+}
+
+.effect-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.effect-card:hover::before {
+    opacity: 1;
+}
+
+.effect-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.effect-card.active {
+    border-color: var(--success-color);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+.effect-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.effect-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    position: relative;
+    z-index: 1;
+}
+
+.effect-config {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    display: none;
+}
+
+.effect-config.visible {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.effect-config-item {
+    margin-bottom: var(--spacing-md);
+}
+
+.effect-config-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.effect-config-value {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+}
+
+/* ===== CANVAS DE EFECTOS ===== */
+.effects-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .gradient-presets-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+
+    .texture-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+
+    .effects-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .texture-properties {
+        grid-template-columns: 1fr;
+    }
+
+    .gradient-stop-item {
+        grid-template-columns: auto 1fr;
+        gap: var(--spacing-xs);
+    }
+
+    .gradient-stop-position,
+    .gradient-stop-opacity {
+        grid-column: 1 / -1;
+    }
+}

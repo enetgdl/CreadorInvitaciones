@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Backups
+backup/
+*.rar
+*.zip
+*.bak
+
+# Logs
+*.log
+
+# Temp files
+*.tmp
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# AI agent docs
+.agents/
+.gemini/
+
+# Test artifacts
+tests/

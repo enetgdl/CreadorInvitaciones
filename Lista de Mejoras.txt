@@ -1,0 +1,128 @@
+A partir del análisis exhaustivo de los documentos provistos, se identificaron todas las solicitudes de corrección, mejoras técnicas y nuevas características para el Creador de Invitaciones Digitales.
+A continuación, se presenta el listado consolidado y depurado, priorizado mediante la relación **Impacto (Ganancia para el usuario/sistema) vs. Esfuerzo (Complejidad y tiempo de implementación)**.
+---
+## 🟢 Prioridad Alta: Retorno Inmediato (Bajo Esfuerzo / Alto Impacto)
+*Cambios críticos de visualización o lógica simple que resuelven bugs reportados o bloqueos de experiencia.*
+### 1. Hardcodeo y Corrección de la "Hora de la Misa"
+* 
+**Descripción:** Modificar el componente para que muestre de forma fija "10:00 a.m." en lugar de "01:00 p.m.". Evitar conversiones erróneas de UTC a local y asegurar persistencia.
+* 
+**Ganancia:** Corrección de un error crítico de datos de cara al usuario final.
+* **Tiempo estimado:** < 1 hora.
+### 2. Eliminación de Secciones Obsoletas en la Pestaña "Efectos"
+* 
+**Descripción:** Remover por completo los contenedores de "Colores", "Tipografia", "Degradados Avanzados", "Texturas" y "Estilos del Contenido". Dejar únicamente el contenedor principal "Efectos".
+* 
+**Ganancia:** Limpieza inmediata de la interfaz (UI) y eliminación de redundancias con otras pestañas.
+* **Tiempo estimado:** 1 - 2 horas.
+### 3. Exclusividad de Fondo en Pestaña "Multimedia"
+* 
+**Descripción:** Implementar un modal de confirmación (*"¿Desea reemplazar el [fondo actual] por el nuevo [tipo de fondo] seleccionado?"*) al intentar cargar un video si ya existe una imagen de fondo, o viceversa. Al confirmar, limpia el almacenamiento local y refresca el canvas.
+* 
+**Ganancia:** Previene la superposición e inconsistencia de recursos multimedia de fondo.
+* **Tiempo estimado:** 2 - 3 horas.
+### 4. Visibilidad Condicional Dinámica de la Cuenta Regresiva y Hora
+* 
+**Descripción:** Ocultar el contenedor de la cuenta regresiva y el campo "Hora" en el canvas si el campo "Fecha del Evento" está vacío o es inválido, de manera idéntica a cómo opera el mapa o el código QR. No debe depender del estado del checkbox.
+* 
+**Ganancia:** Elimina el bug actual donde el componente muestra la leyenda *"Configure Fecha en pestaña General"* en lugar de ocultarse de forma limpia.
+* **Tiempo estimado:** 2 - 3 horas.
+### 5. Aplicación del Fondo con Degradado Predeterminado
+* 
+**Descripción:** Configurar un gradiente vertical de amarillo (`#FFD700`) a blanco (`#FFFFFF`) en todo el fondo del área de la invitación mediante CSS, asegurando que no sea sobrescrito por otros estilos.
+* 
+**Ganancia:** Cumplimiento de la identidad visual base del lienzo.
+* **Tiempo estimado:** 1 hora.
+---
+## 🟡 Prioridad Media: Optimización y Usabilidad (Medio Esfuerzo / Medio-Alto Impacto)
+*Mejoras funcionales y de navegación que refinan el flujo de trabajo del usuario.*
+### 6. Scroll Superior Absoluto al Cambiar de Pestaña en el Acordeón
+* 
+**Descripción:** Modificar el evento `click` del acordeón para ejecutar un `window.scrollTo(0, 0)` suave tras finalizar la animación de apertura. Esto reemplaza el enfoque automático en campos específicos solicitado en versiones previas.
+* 
+**Ganancia:** Consistencia en la navegación tanto en escritorio como en dispositivos móviles, evitando saltos erráticos.
+* **Tiempo estimado:** 2 - 4 horas.
+### 7. Icono y Modal de Ayuda para "Confirmación de Asistencia"
+* 
+**Descripción:** Insertar un icono de ayuda interactivo (estilo idéntico al del Mapa) al lado del campo "Habilitar Confirmación de Asistencia". Al hacer clic (solo si el campo está activo ), abrirá un modal responsive (WCAG 2.1) con instrucciones paso a paso para integrar Google Forms y campos sugeridos.
+* 
+**Ganancia:** Reduce la fricción del usuario al configurar enlaces externos de confirmación.
+* **Tiempo estimado:** 3 - 5 horas.
+### 8. Ampliación de la Paleta de Colores de Tema
+* 
+**Descripción:** Agregar Azul Cielo, Verde Limón, Violeta, Café Claro, Gris Oscuro y una opción de color "Personalizado" a la pestaña General. Incorporar un contenedor "Tema" abajo de "Dirección" con 10 recuadros de colores mapeados a la función de temas existente del sistema.
+* 
+**Ganancia:** Mayor personalización estética sin requerir conocimientos de diseño avanzados.
+* **Tiempo estimado:** 3 - 5 horas.
+### 9. Nuevos Campos en Pestaña General según Tipo de Evento
+* 
+**Descripción:** Añadir "Lugar de la Misa", "Hora de la Misa" y "Dirección del Templo" con switches de habilitación/deshabilitación independientes. Si el evento es *XV Años*, *Boda* o *Bautizo*, se activan por defecto; para otros, se apagan.
+* 
+**Ganancia:** Automatización del flujo de llenado de datos según el contexto de la celebración.
+* **Tiempo estimado:** 4 - 6 horas.
+### 10. Corrección del Salto de Scroll Anómalo en el Simulador
+* 
+**Descripción:** Diagnosticar e interceptar los listeners de eventos de scroll mal configurados o con desbordamientos (`overflow`) incorrectos que causan que el contenido salte al inicio al intentar ir hacia abajo o que permita un scroll infinito hacia arriba. Implementar límites estrictos.
+* 
+**Ganancia:** Estabiliza la usabilidad y la fidelidad del simulador interactivo de previsualización.
+* **Tiempo estimado:** 4 - 6 horas.
+---
+## 🟠 Prioridad Significativa: Estructura y Limpieza (Alto Esfuerzo / Alto Impacto Técnico)
+*Refactorizaciones complejas del core de la aplicación para mitigar fugas de memoria, optimizar el rendimiento y asegurar persistencia.*
+### 11. Gestión Autónoma y Persistencia Post-Refresh de Multimedia
+* 
+**Descripción:** Modificar la destrucción de recursos en el canvas para que elimine físicamente los archivos del DOM, referencias en memoria y del `localStorage/sessionStorage`. Crear un mecanismo de persistencia temporal para mapear recursos cargados antes de un F5/Ctrl+F5 y purgar automáticamente elementos huérfanos tras la recarga.
+* **Ganancia:** Garantiza limpieza del almacenamiento del navegador al 100%, evitando la sobrecarga por archivos basura.
+* **Tiempo estimado:** 1 - 2 días de desarrollo.
+### 12. Diseño Responsivo y Sistema de Centrado Automatizado con Exclusiones
+* 
+**Descripción:** Desarrollar una función con arquitectura modular que centre contenedores utilizando Flexbox/Grid en viewports de 320px a 768px (manteniendo proporciones verticales). Debe incluir un *debouncer* de 250ms para el *resize* de pantalla y **excluir específicamente** del centrado automático a los elementos creados dinámicamente vía "insertar texto" o "insertar imagen".
+* 
+**Ganancia:** Asegura que la estructura base de la invitación sea responsiva sin romper el posicionamiento libre (drag-and-drop) de las capas añadidas por el usuario.
+* **Tiempo estimado:** 2 - 3 días de desarrollo.
+### 13. Implementación de Nueva Pestaña "Galería" e Integración de Collages
+* 
+**Descripción:** Crear la sección "Galería" debajo de "Hero" (máximo 6 fotos). Integrar las soluciones ya implementadas en el proyecto: `IntelligentCollageGenerator` (layout vertical optimizado) y `MasonryCollageGenerator` (layout tipo grid sin recuadros negros usando recorte `object-fit: cover`) , junto con las opciones de carrusel dinámico con 10 efectos modernos de transición.
+* 
+**Ganancia:** Despliegue de un portafolio fotográfico optimizado y estético directamente en la invitación.
+* **Tiempo estimado:** 2 - 3 días (Principalmente tareas de integración de UI, dado que los generadores de collage ya están completados).
+### 14. Corrección de Contraste y Redimensionamiento en Módulo de Galería
+* 
+**Descripción:** Corregir el CSS del panel del carrusel eliminando el fondo blanco para cumplir con el contraste mínimo WCAG 4.5:1. Desarrollar las media queries y lógica de detección para el escalado diferenciado de imágenes (`object-fit: contain`) entre el simulador y dispositivos reales para evitar distorsiones.
+* 
+**Ganancia:** Accesibilidad visual y renderizado perfecto de las imágenes cargadas por el usuario.
+* **Tiempo estimado:** 1 día de desarrollo.
+---
+## 🔴 Prioridad Compleja: Transformación del Core (Muy Alto Esfuerzo / Máximo Impacto Técnico)
+*Cambios de infraestructura de software que requieren reescritura de módulos principales y fases extensas de pruebas de regresión.*
+### 15. Parche Crítico de Renderizado Multi-Navegador (Firefox vs. Opera)
+* 
+**Descripción:** Resolver el truncamiento crítico al 50% de la imagen de los festejados en Opera (Blink). Requiere auditar hojas de estilo de impresión, eliminar espaciados temporales anómalos , corregir propiedades como `break-inside: avoid` en contenedores flex , `clipPath` o `devicePixelRatio` al invocar `window.print()`.
+* 
+**Ganancia:** Consistencia total del archivo final exportado (PDF/PNG) independientemente del navegador del usuario.
+* 
+**Tiempo estimado:** 3 - 5 días (Análisis profundo, refactor de CSS de impresión y pruebas cruzadas).
+### 16. Sistema de Optimización y Compresión Multimedia (Límite 10MB)
+* 
+**Descripción:** Implementar compresión adaptativa en el cliente seleccionando herramientas ligeras (como *Compressor.js* para imágenes y *MediaRecorder API* para video para evitar dependencias externas). Limitar dimensiones a 1920x1080 (imágenes) y 1280x720 (videos) con conversión automática a WebP y MP4. Garantizar mediante cola asíncrona que el paquete final de assets de la invitación no exceda los 10MB.
+* 
+**Ganancia:** Velocidad de carga óptima de la invitación final en dispositivos móviles con redes 3G/4G.
+* **Tiempo estimado:** 4 - 6 días de desarrollo.
+### 17. Migración del Preview Iframe a Canvas Interactivo (HTML5 / WebGL)
+* 
+**Descripción:** Sustituir la previsualización basada en Iframe por un entorno Canvas interactivo completo. Debe soportar arrastre (*drag-and-drop*), snapping con grillas personalizables , transformaciones vectoriales directas, edición de texto en línea, control estricto de capas (z-index) y exportación a un único archivo HTML autocontenido con estilos e imágenes embebidas en Base64.
+* 
+**Ganancia:** Transforma el editor estático en una herramienta de diseño gráfico profesional en tiempo real fluida y robusta.
+* **Tiempo estimado:** 7 - 12 días de desarrollo e integración.
+### 18. Módulo de Almacenamiento Seguro Encriptado (`config.vault`)
+* 
+**Descripción:** Crear un sistema modular en JS puro que persista la configuración en un archivo vault local encriptado mediante AES-256-GCM (Web Crypto API) y derivación de claves PBKDF2. Incluye backups automáticos por marcas de tiempo, esquemas de validación JSON, logs de auditoría estrictos y control de concurrencia (Mutex) mediante *File System Access API*.
+* 
+**Ganancia:** Máxima seguridad y aislamiento robusto para los parámetros globales del sistema de configuración.
+* **Tiempo estimado:** 5 - 8 días de desarrollo.
+### 19. Rediseño Completo de la UI inspirado en Software Profesional
+* 
+**Descripción:** Implementar la interfaz de alta fidelidad con barras de menús compactas, paneles contextuales dinámicos que varían según el elemento clickeado, selectores avanzados de color (HSL/RGB/Hex) y marcos de simulación de dispositivos móviles reales.
+* 
+**Ganancia:** Modernización estética total que compite directamente con plataformas de diseño web modernas.
+* **Tiempo estimado:** 8 - 15 días (Trabajo conjunto de maquetación, diseño de experiencia e integración con el estado de la aplicación).

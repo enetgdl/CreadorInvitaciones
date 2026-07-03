@@ -1,0 +1,395 @@
+/**
+ * ENHANCED-LAYER-PANEL.CSS
+ * Estilos para el panel de capas con sincronización en tiempo real
+ * Diseño compacto, moderno y responsivo
+ */
+
+/* ========== Variables ========== */
+:root {
+    --layer-item-height: 48px;
+    --layer-item-padding: 8px;
+    --layer-icon-size: 24px;
+    --layer-action-size: 32px;
+    --layer-border-radius: 6px;
+    --layer-transition: all 0.2s ease;
+
+    /* Colores - Ajustados para diseño oscuro del editor */
+    --layer-bg: #2b3544;
+    --layer-bg-hover: #374151;
+    --layer-bg-selected: #3b5998;
+    --layer-border: #1f2937;
+    --layer-text: #e5e7eb;
+    --layer-text-secondary: #9ca3af;
+    --layer-icon-color: #cbd5e1;
+    --layer-action-hover: #4b5563;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --layer-bg: #1e293b;
+        --layer-bg-hover: #334155;
+        --layer-bg-selected: #1e40af;
+        --layer-border: #334155;
+        --layer-text: #f1f5f9;
+        --layer-text-secondary: #94a3b8;
+        --layer-icon-color: #cbd5e1;
+        --layer-action-hover: #475569;
+    }
+}
+
+/* ========== Panel de Capas ========== */
+.layers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    min-height: 200px;
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.layers-list:empty::before {
+    content: '📦 No hay capas';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    color: var(--layer-text-secondary);
+    font-size: 14px;
+}
+
+/* ========== Item de Capa ========== */
+.layer-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--layer-item-height);
+    padding: var(--layer-item-padding);
+    background: var(--layer-bg);
+    border: 1px solid var(--layer-border);
+    border-radius: var(--layer-border-radius);
+    cursor: pointer;
+    transition: var(--layer-transition);
+    user-select: none;
+    position: relative;
+}
+
+.layer-item:hover {
+    background: var(--layer-bg-hover);
+    transform: translateX(2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.layer-item.selected {
+    background: var(--layer-bg-selected);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.layer-item.dragging {
+    opacity: 0.5;
+    cursor: move;
+}
+
+.layer-item.drag-over {
+    border-top: 2px solid #3b82f6;
+}
+
+/* ========== Icono de Capa ========== */
+.layer-icon {
+    flex-shrink: 0;
+    width: var(--layer-icon-size);
+    height: var(--layer-icon-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--layer-icon-color);
+}
+
+/* ========== Contenido de Capa ========== */
+.layer-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.layer-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--layer-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+
+.layer-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--layer-text-secondary);
+}
+
+.layer-type {
+    text-transform: capitalize;
+    background: rgba(100, 116, 139, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+.layer-size {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+}
+
+/* ========== Acciones de Capa ========== */
+.layer-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.layer-item:hover .layer-actions,
+.layer-item.selected .layer-actions {
+    opacity: 1;
+}
+
+.layer-action-btn {
+    width: var(--layer-action-size);
+    height: var(--layer-action-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+    padding: 0;
+}
+
+.layer-action-btn:hover {
+    background: var(--layer-action-hover);
+}
+
+.layer-action-btn:active {
+    transform: scale(0.95);
+}
+
+/* ========== Contador de Capas ========== */
+.layer-count {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--layer-text-secondary);
+    text-align: center;
+    border-top: 1px solid var(--layer-border);
+    margin-top: 8px;
+}
+
+/* ========== Animaciones ========== */
+@keyframes layerFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes layerFadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+}
+
+.layer-item.animating-in {
+    animation: layerFadeIn 0.3s ease;
+}
+
+.layer-item.animating-out {
+    animation: layerFadeOut 0.2s ease forwards;
+}
+
+/* ========== Estados Especiales ========== */
+.layer-item[data-locked="true"] {
+    opacity: 0.7;
+}
+
+.layer-item[data-locked="true"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(45deg,
+            transparent,
+            transparent 10px,
+            rgba(0, 0, 0, 0.02) 10px,
+            rgba(0, 0, 0, 0.02) 20px);
+    pointer-events: none;
+    border-radius: var(--layer-border-radius);
+}
+
+.layer-item[data-visible="false"] {
+    opacity: 0.5;
+}
+
+.layer-item[data-visible="false"] .layer-name {
+    text-decoration: line-through;
+}
+
+/* ========== Scrollbar Personalizado ========== */
+.layers-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.layers-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.layers-list::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.3);
+    border-radius: 3px;
+}
+
+.layers-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.5);
+}
+
+/* ========== Responsivo ========== */
+@media (max-width: 768px) {
+    .layer-item {
+        min-height: 56px;
+        padding: 10px;
+    }
+
+    .layer-action-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+
+    .layer-actions {
+        opacity: 1;
+        /* Siempre visible en móvil */
+    }
+
+    .layer-name {
+        font-size: 14px;
+    }
+
+    .layer-meta {
+        font-size: 12px;
+    }
+}
+
+/* ========== Accesibilidad ========== */
+@media (prefers-reduced-motion: reduce) {
+
+    .layer-item,
+    .layer-action-btn,
+    .layer-actions {
+        transition: none;
+    }
+
+    .layer-item.animating-in,
+    .layer-item.animating-out {
+        animation: none;
+    }
+}
+
+/* Asegurar áreas de click mínimas de 44x44px en touch devices */
+@media (pointer: coarse) {
+    .layer-action-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* ========== Focus visible para navegación por teclado ========== */
+.layer-item:focus-visible,
+.layer-action-btn:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* ========== Indicador de carga ========== */
+.layers-list.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.layers-list.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    border: 3px solid rgba(59, 130, 246, 0.2);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========== Mensajes de estado ========== */
+.layer-status-message {
+    padding: 12px;
+    margin: 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.layer-status-message.info {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #7dd3fc;
+}
+
+.layer-status-message.warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+.layer-status-message.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.layer-status-message.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}

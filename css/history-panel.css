@@ -1,0 +1,423 @@
+/* ===============================================
+   HISTORY PANEL STYLES
+   =============================================== */
+
+/* Panel de Historia - Estilos específicos para el panel adosado */
+#historyPanel {
+    width: 360px;
+    max-width: 90vw;
+    min-height: 400px;
+}
+
+#historyPanel.is-docked {
+    resize: none;
+}
+
+/* Estilos para los botones de filtro - Optimizados */
+/* Estilos para los botones de filtro con ICONOS */
+/* Contenedor de filtros - Espaciado reducido y centrado */
+.history-filters {
+    margin-top: 4px;
+    /* Espaciado exacto desde título */
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 5;
+}
+
+/* Barra de botones - 96% de ancho con margen automático */
+.history-filters .segmented {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    width: 96%;
+    /* 96% del ancho total */
+    margin: 0 auto;
+    /* Centrado automático (2% cada lado) */
+    overflow: visible;
+    /* Para tooltips */
+}
+
+/* Ocultar scrollbars */
+.history-filters .segmented::-webkit-scrollbar {
+    display: none;
+}
+
+/* Botones de filtro - Uniformes con transparencia */
+.history-filters .segmented-btn {
+    flex: 1 1 0;
+    /* Ancho uniforme para todos los botones */
+    min-width: 0;
+    /* Prevenir desbordamiento */
+    max-width: none;
+    /* Sin límite máximo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 0;
+    margin: 0;
+    border-radius: 0;
+
+    /* ESTADO INACTIVO - Con transparencia (Referencia: Relleno Avanzado) */
+    background: rgba(30, 41, 59, 0.6) !important;
+    /* Transparencia 60% */
+    background-color: rgba(30, 41, 59, 0.6) !important;
+    background-image: none !important;
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    /* Borde semi-transparente */
+    border-right-width: 0;
+    color: #94a3b8;
+    /* Slate 400 */
+
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    transform: none !important;
+    position: relative;
+}
+
+/* Iconos SVG */
+.history-filters .segmented-btn svg {
+    display: block;
+    /* Eliminar espacio inline */
+    pointer-events: none;
+    fill: currentColor;
+}
+
+/* Restaurar borde derecho en el último */
+.history-filters .segmented-btn:last-child {
+    border-right-width: 1px;
+}
+
+/* Primer y último borde redondeado */
+.history-filters .segmented-btn:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.history-filters .segmented-btn:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+/* ESTADO ACTIVO - Morado con transparencia 50% */
+.history-filters .segmented-btn.active {
+    background: rgba(124, 58, 237, 0.5) !important;
+    /* Morado transparente 50% */
+    background-color: rgba(124, 58, 237, 0.5) !important;
+    background-image: none !important;
+    border-color: rgba(124, 58, 237, 0.7) !important;
+    /* Borde más opaco */
+    color: #ffffff !important;
+    transform: none !important;
+    z-index: 5;
+}
+
+/* Hover sin estar activo - Con transparencia */
+.history-filters .segmented-btn:hover:not(.active) {
+    background: rgba(51, 65, 85, 0.8) !important;
+    /* Más opaco en hover */
+    background-color: rgba(51, 65, 85, 0.8) !important;
+    background-image: none !important;
+    color: #e2e8f0 !important;
+    border-color: rgba(71, 85, 105, 0.8) !important;
+    transform: none !important;
+    z-index: 2;
+}
+
+/* Focus Accesible */
+.history-filters .segmented-btn:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: -2px;
+    z-index: 10;
+}
+
+/* TOOLTIPS IMPLEMENTATION - Mover hacia ABAJO */
+.history-filters .segmented-btn::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: 100%;
+    /* Mostrar DEBAJO del botón */
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    /* Empieza un poco más abajo */
+    margin-top: 10px;
+    /* Separación del botón */
+    padding: 5px 8px;
+    background-color: #1e293b;
+    /* Slate-900 */
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition-delay: 0.3s;
+    /* Delay de aparición */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    /* Asegurar que se vea por encima de todo */
+}
+
+/* Flechita del Tooltip - Apuntando hacia arriba (desde abajo) */
+.history-filters .segmented-btn::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    margin-top: 6px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: transparent transparent #1e293b transparent;
+    /* Punta hacia arriba */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition-delay: 0.3s;
+    z-index: 100;
+}
+
+/* Mostrar Tooltips en Hover */
+.history-filters .segmented-btn:hover::before,
+.history-filters .segmented-btn:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    /* Animación suave hacia su posición final */
+}
+
+/* Lista de historia */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    max-height: calc(var(--af-body-max, 500px) - 200px);
+    padding-right: 8px;
+}
+
+/* Items de historia */
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(148, 163, 184, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.history-item:hover {
+    background: rgba(148, 163, 184, 0.15);
+    border-color: rgba(148, 163, 184, 0.3);
+    transform: translateX(4px);
+}
+
+/* Estados de historia */
+.history-item-past {
+    opacity: 0.85;
+}
+
+.history-item-future {
+    opacity: 0.5;
+    border-style: dashed;
+}
+
+.history-item-future:hover {
+    opacity: 0.75;
+}
+
+/* Icono del item */
+.history-item-icon {
+    font-size: 20px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+/* Contenido del item */
+.history-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.history-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.history-item-time {
+    font-weight: 500;
+}
+
+.history-item-relative {
+    opacity: 0.7;
+}
+
+.history-item-category {
+    padding: 2px 6px;
+    background: rgba(148, 163, 184, 0.15);
+    border-radius: 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Botón de acción en el item */
+.history-item-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.history-item-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(148, 163, 184, 0.1);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.history-item-btn:hover {
+    background: rgba(148, 163, 184, 0.2);
+    border-color: rgba(148, 163, 184, 0.5);
+    transform: scale(1.1);
+}
+
+.history-item-btn:active {
+    transform: scale(0.95);
+}
+
+/* Marcador de estado actual */
+.history-current-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(249, 115, 22, 0.2));
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-color);
+    position: relative;
+}
+
+.history-current-marker::before,
+.history-current-marker::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+    top: -8px;
+}
+
+.history-current-marker::after {
+    top: auto;
+    bottom: -8px;
+}
+
+/* Estilos para paneles adosados (50/50 spacing) */
+#historyPanel.is-docked,
+#advancedFillModal.is-docked {
+    transition: height 0.3s ease, top 0.3s ease;
+}
+
+/* Scrollbar personalizado para la lista de historia */
+.history-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.history-list::-webkit-scrollbar-track {
+    background: rgba(148, 163, 184, 0.05);
+    border-radius: 4px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 4px;
+}
+
+.history-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+}
+
+/* Botón de historial en toolbar */
+#historyPanelBtn svg path {
+    stroke: currentColor;
+}
+
+#historyPanelBtn.is-pinned {
+    background: rgba(var(--accent-rgb), 0.2);
+}
+
+/* Estado vacío */
+.history-empty-state {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+/* Responsive: Ajustar elementos en pantallas pequeñas */
+@media (max-width: 480px) {
+
+    /* Ajustes para items de historial */
+    .history-item {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .history-item-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+    }
+
+    .history-item-title {
+        font-size: 12px;
+    }
+
+    .history-item-meta {
+        font-size: 10px;
+    }
+}
+
+/* Ajuste de modo pinned para el panel de historia */
+#historyPanel.is-pinned .floating-modal-header-actions #historyPanelPinBtn {
+    background: rgba(var(--accent-rgb), 0.3);
+    color: var(--accent-color);
+}
+
+/* Ajuste de modo docked para el panel de historia */
+#historyPanel.is-docked .floating-modal-header-actions #historyPanelDockBtn {
+    background: rgba(var(--accent-rgb), 0.3);
+    color: var(--accent-color);
+}

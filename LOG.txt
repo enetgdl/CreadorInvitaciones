@@ -1,0 +1,89 @@
+rsvp-help-modal.js:135 ✅ RSVP Help Modal loaded.
+responsive-centering-manager.js:393 ✅ Responsive Centering Manager module loaded.
+sanitize.js:381 ✅ Sanitize.js cargado correctamente
+utils.js:400 ✅ Utils.js cargado correctamente
+history-dropdown.js:239 HistoryDropdown system loaded
+history-panel.js:638 HistoryPanel system loaded
+history-dropdown-diagnostics.js:317 ✅ Diagnósticos cargados
+history-dropdown-diagnostics.js:318 Ejecutar: HistoryDropdownDiagnostics.runAll()
+history-deduplication-cleanup.js:274 🧹 Utilidad de limpieza de historial cargada.
+history-deduplication-cleanup.js:275    Ejecutar: cleanupHistoryDuplicates()
+history-deduplication-tests.js:516 🧪 Suite de pruebas de deduplicación cargada.
+history-deduplication-tests.js:517    Ejecutar: await runDeduplicationTests()
+image-optimizer-test.js:132 Cargado suite de pruebas de imagen. Ejecute window.runImageTests() para iniciar.
+background-exclusivity-test.js:218 Cargado suite de pruebas de exclusividad de fondos. Ejecute window.runBackgroundExclusivityTests() para iniciar.
+media-persistence-test.js:346 Cargado suite de pruebas de persistencia de multimedia.
+media-persistence-test.js:347 Ejecute window.runMediaPersistenceTests() para iniciar tests automáticos.
+media-persistence-test.js:348 Ejecute window.showRefreshScenarios() para ver escenarios de prueba manual.
+countdown-visibility-test.js:474 ✅ Tests exhaustivos de visibilidad de cuenta regresiva cargados.
+countdown-visibility-test.js:475 📝 Ejecute window.runCountdownTests() para iniciar.
+accordion-navigation-test.js:686 ✅ Tests de navegación del acordeón cargados.
+accordion-navigation-test.js:687 📝 Ejecute window.runAccordionNavigationTests() para iniciar.
+accordion-accessibility-enhanced-test.js:528 ✅ Tests de accesibilidad mejorada del acordeón cargados.
+accordion-accessibility-enhanced-test.js:529 📝 Ejecute window.runAccordionAccessibilityEnhancedTests() para iniciar.
+accordion-redesign-test.js:637 ✅ Tests de rediseño del acordeón cargados.
+accordion-redesign-test.js:638 📝 Ejecute window.runAccordionRedesignTests() para iniciar.
+layer-store.js:22 📦 Layer Store inicializado
+layer-sync.js:25 📡 Iniciando Servicio de Sincronización (SSE/WS Mode)...
+layer-sync.js:39 ✅ Servicio de Sincronización Activo
+layer-manager-test.js:1009 ✅ Tests de Layer Manager cargados.
+layer-manager-test.js:1010 📝 Ejecute window.runLayerManagerTests() para iniciar.
+enhanced-layer-sync-test.js:454 🧪 Enhanced Layer Sync Tests cargado
+enhanced-layer-sync-test.js:455    Ejecutar: EnhancedLayerSyncTests.runAll()
+enhanced-layer-sync-test.js:456    Test de estrés: EnhancedLayerSyncTests.runStress()
+media-delete-test.js:564 ✅ Tests de eliminación de multimedia cargados.
+media-delete-test.js:565 📝 Ejecute window.runMediaDeleteTests() para iniciar.
+rsvp-help-modal-test.js:447 ✅ Tests del modal de ayuda RSVP cargados.
+rsvp-help-modal-test.js:448 📝 Ejecute window.runRSVPHelpModalTests() para iniciar.
+conditional-visibility-test.js:284 ✅ Tests de Visibilidad Condicional cargados (window.runConditionalVisibilityTests())
+selection-box-test.js:457 ✅ Tests de Recuadro de Selección cargados (window.runSelectionBoxTests())
+responsive-centering-test.js:622 ✅ Tests del sistema de centrado responsivo cargados.
+responsive-centering-test.js:623 📝 Ejecute window.runResponsiveCenteringTests() para iniciar.
+preview-styles.js:197 ✅ preview-styles.js cargado correctamente
+preview-gallery.js:286 ✅ preview-gallery.js cargado correctamente
+preview-effects.js:226 ✅ preview-effects.js cargado correctamente
+preview.js:16 ✅ Preview.js cargado (versión refactorizada)
+editor-forms.js:239 ✅ editor-forms.js cargado correctamente
+editor-events.js:297 ✅ editor-events.js cargado correctamente
+editor-validation.js:305 ✅ editor-validation.js cargado correctamente
+editor-media.js:215 ✅ editor-media.js cargado correctamente
+editor.js:17 ✅ Editor.js cargado (versión refactorizada)
+enhanced-layer-realtime-sync.js:78 🚀 Inicializando Enhanced Layer Realtime Sync...
+enhanced-layer-realtime-sync.js:132 ✓ Elementos DOM encontrados
+enhanced-layer-realtime-sync.js:168 ✓ MutationObserver configurado
+enhanced-layer-realtime-sync.js:189 ✓ ResizeObserver configurado
+enhanced-layer-realtime-sync.js:201 ✓ AttributeObserver configurado
+enhanced-layer-realtime-sync.js:230 ✓ Event listeners configurados
+enhanced-layer-realtime-sync.js:272 ✓ Integrando con LayerStore...
+enhanced-layer-realtime-sync.js:300 🔄 Realizando sincronización inicial...
+enhanced-layer-realtime-sync.js:323 ✅ Sincronización inicial completada en 1.80ms
+enhanced-layer-realtime-sync.js:103 ✅ Enhanced Layer Realtime Sync inicializado correctamente
+advanced-effects.js?v=2.2:8 🎆 EFECTOS AVANZADOS v2.0 CARGADOS - CON EFECTO PYRO
+layer-manager.js:39 🎨 Inicializando Layer Manager (Flux Architecture)...
+layer-manager.js:49 ✅ Layer Manager Conectado al Store
+contentScript.js:49986 [Sentry] You cannot use Sentry.init() in a browser extension, see: https://docs.sentry.io/platforms/javascript/best-practices/browser-extensions/
+(anonymous) @ contentScript.js:49986
+Zc @ contentScript.js:45958
+qae @ contentScript.js:49985
+Gae @ contentScript.js:50018
+Xae @ contentScript.js:50051
+(anonymous) @ contentScript.js:50080
+await in (anonymous)
+(anonymous) @ contentScript.js:50377
+responsive-centering-manager.js:44 ✅ Responsive Centering Manager initialized
+responsive-centering-manager.js:388 ✅ Responsive Centering Manager initialized for preview
+history-dropdown.js:28 HistoryDropdown: Creating split button for undo
+history-dropdown.js:28 HistoryDropdown: Creating split button for redo
+history-manager.js:64 HistoryManager: Inicializado
+history-panel.js:47 HistoryPanel: Inicializado
+dynamic-elements-manager.js:32 📦 Loaded 0 dynamic elements from storage
+dynamic-elements-manager.js:21 ✅ DynamicElementsManager initialized
+media-persistence-manager.js:18 🔧 Inicializando MediaPersistenceManager...
+media-persistence-manager.js:195 🔍 Buscando archivos huérfanos...
+media-persistence-manager.js:29 ✅ MediaPersistenceManager inicializado
+editor-core.js:262 Editor inicializado correctamente
+preview-core.js:86 Framing 'blob:http://localhost/7f7525f2-7ad7-4e96-b8b5-0e3f4330b3f2' violates the following Content Security Policy directive: "frame-src https://maps.google.com". The request has been blocked.
+
+web-client-content-script.js:2 Uncaught TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at HTMLIFrameElement.<anonymous> (web-client-content-script.js:2:1594784)
+(anonymous) @ web-client-content-script.js:2

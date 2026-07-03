@@ -1,0 +1,31 @@
+Actúa como un Ingeniero de Software Senior, Arquitecto de Sistemas y Especialista en Seguridad de Aplicaciones (AppSec), experto en entornos PHP puro, JavaScript Vanilla y bases de datos SQLite local (XAMPP). Tu objetivo es realizar un diagnóstico técnico profundo y una auditoría de seguridad exhaustiva del estado actual del sistema para preparar el terreno para futuras mejoras y blindar la aplicación.
+
+Realiza un nuevo Análisis Integral del Sistema (ignora por completo cualquier análisis previo):
+1. ESTRUCTURA Y FLUJO: Examina en profundidad todos los archivos, componentes, funciones y variables del sistema actual en el directorio raíz. Comprende la arquitectura, el flujo de datos entre las vistas y el backend, el manejo de sesiones, y las dependencias entre archivos.
+2. COMPRENSIÓN DE DATOS: Analiza cómo interactúa el sistema con la base de datos SQLite (conexiones, consultas, transacciones, preparación de sentencias y manejo del archivo `.db`).
+
+AUDITORÍA DE SEGURIDAD CRÍTICA (Eje Principal):
+Examina minuciosamente el código para detectar fallos de seguridad, priorizando los siguientes vectores específicos de tu stack:
+- INYECCIÓN SQL (SQLite): Revisa cada interacción con la base de datos. Identifica si existen consultas armadas mediante concatenación de strings en lugar de sentencias preparadas puras con PDO.
+- CROSS-SITE SCRIPTING (XSS): Analiza cómo se renderizan los datos en el frontend con JS Vanilla. Busca el uso inseguro de `innerHTML` o inserciones directas en el DOM sin sanitización o escapado previo de caracteres.
+- CONTROL DE ACCESO Y AUTENTICACIÓN: Verifica que cada script de procesamiento en el backend valide rigurosamente la sesión activa y los permisos del usuario antes de ejecutar cualquier acción (lectura, inserción o borrado). Asegúrate de que no existan endpoints expuestos que ejecuten lógica sin autorización.
+- GESTIÓN DE SESIONES: Evalúa la configuración de las sesiones en PHP (fijación de sesión, secuestro, uso de flags de cookies seguras si aplica, y destrucción correcta al cerrar sesión).
+- EXPOSICIÓN DE DATOS: Verifica que los archivos sensibles (como el archivo `.db` de SQLite, archivos de configuración o claves) no sean accesibles directamente a través de rutas web del servidor.
+
+Detección de Problemas Arquitectónicos y Oportunidades:
+- CÓDIGO REDUNDANTE: Busca funciones duplicadas, lógica repetitiva o scripts JS/PHP que puedan unificarse en funciones auxiliares o clases reutilizables.
+- OBJETOS DIOS (God Objects): Identifica archivos monolíticos de gran tamaño (scripts PHP que mezclan lógica de negocio, HTML y consultas SQL) y evalúa su modularización.
+- EFICIENCIA Y RENDIMIENTO: Evalúa el rendimiento de las consultas SQLite (falta de índices en campos de búsqueda frecuente, consultas redundantes dentro de bucles) y la eficiencia del procesamiento de datos en JS Vanilla.
+- LIMPIEZA Y LEGIBILIDAD: Evalúa la consistencia en el nombramiento de variables/funciones y la estructura general del código para garantizar que sea fácil de mantener.
+
+Resumen de Hallazgos y Soluciones Propuestas:
+Genera un informe estructurado, conciso y de alto valor técnico que incluya:
+- Matriz de Vulnerabilidades de Seguridad: Clasifica cada fallo de seguridad encontrado usando niveles de riesgo claramente definidos (Crítico, Alto, Medio, Bajo) explicando el impacto real del fallo en el sistema.
+- Defectos Arquitectónicos: Detalla qué lógica está duplicada o mal acoplada.
+- Recomendaciones de Mitigación Nativas: Propón soluciones basadas estrictamente en código PHP puro y JS Vanilla (ej: "Implementar sentencias preparadas con PDO", "Cambiar innerHTML por textContent", o "Centralizar la validación de sesión en un script de control de acceso").
+- Priorización: Clasifica las acciones a tomar equilibrando el nivel de riesgo de seguridad (lo primero a resolver) con el impacto en el rendimiento y el esfuerzo requerido.
+
+Entregable Obligatorio:
+Genera una guía detallada de implementación en pasos secuenciales, ordenada, clara y con iconos para una mejor referencia visual. Guarda esta guía e informe completo en un archivo llamado "README_REFACTOR.md" (o actualiza el "context.md" según corresponda) en el directorio raíz del sistema.
+
+⚠️ IMPORTANTE: Tu tarea actual es ÚNICAMENTE realizar el análisis, la auditoría y guardar el informe en la raíz. NO inicies con ninguna implementación de código ni modifiques los archivos funcionales del sistema hasta que te lo solicite explícitamente.

@@ -1,0 +1,325 @@
+# Arquitectura del Sistema de Tiempo Real
+
+## Diagrama de Componentes
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         USUARIO INTERACTÚA                               │
+│                    (Escribe, hace clic, arrastra)                        │
+└────────────────────────────────┬────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      REALTIME INTEGRATION                                │
+│                    (Coordinador Central)                                 │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  • Auto-inicialización                                           │   │
+│  │  • Intercepta métodos del editor                                 │   │
+│  │  • Maneja atajos de teclado (Ctrl+Z, Ctrl+Y, Ctrl+S)           │   │
+│  │  • Coordina todos los subsistemas                               │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+└────────────┬──────────────────────┬──────────────────────┬──────────────┘
+             │                      │                      │
+             ▼                      ▼                      ▼
+┌────────────────────┐  ┌──────────────────────┐  ┌─────────────────────┐
+│  STATE MANAGER     │  │  PREVIEW UPDATER     │  │   LAYER SYNC        │
+│                    │  │                      │  │                     │
+│ ┌────────────────┐ │  │ ┌──────────────────┐ │  │ ┌─────────────────┐ │
+│ │ Estado Único   │ │  │ │ Cola Updates     │ │  │ │ Panel UI        │ │
+│ │ de Verdad      │ │  │ │ Debouncing       │ │  │ │ Drag & Drop     │ │
+│ │                │ │  │ │ Inteligente      │ │  │ │ Edición Inline  │ │
+│ │ • Data         │ │  │ │                  │ │  │ │                 │ │
+│ │ • Layers       │ │  │ │ • Adaptativo     │ │  │ │ • Reordenar     │ │
+│ │ • Selection    │ │  │ │ • 60fps max      │ │  │ │ • Renombrar     │ │
+│ │                │ │  │ │ • Prioridades    │ │  │ │ • Acciones      │ │
+│ └────────────────┘ │  │ └──────────────────┘ │  │ └─────────────────┘ │
+│                    │  │                      │  │                     │
+│ ┌────────────────┐ │  │ ┌──────────────────┐ │  │ ┌─────────────────┐ │
+│ │ Suscriptores   │ │  │ │ Observadores DOM │ │  │ │ Sincronización  │ │
+│ │                │ │  │ │                  │ │  │ │ Bidireccional   │ │
+│ │ • data         │ │  │ │ • MutationObs    │ │  │ │                 │ │
+│ │ • layers       │ │  │ │ • Input Events   │ │  │ │ UI ↔ Estado     │ │
+│ │ • selection    │ │  │ │ • Change Events  │ │  │ │                 │ │
+│ │ • all          │ │  │ └──────────────────┘ │  │ └─────────────────┘ │
+│ └────────────────┘ │  │                      │  │                     │
+│                    │  │ ┌──────────────────┐ │  │ ┌─────────────────┐ │
+│ ┌────────────────┐ │  │ │ Feedback Visual  │ │  │ │ Animaciones     │ │
+│ │ Historial      │ │  │ │                  │ │  │ │                 │ │
+│ │ Undo/Redo      │ │  │ │ • Indicador      │ │  │ │ • Enter/Exit    │ │
+│ │                │ │  │ │ • Spinner        │ │  │ │ • Smooth        │ │
+│ │ • Past (50)    │ │  │ │ • Notificaciones │ │  │ │ • 200ms         │ │
+│ │ • Future       │ │  │ └──────────────────┘ │  │ └─────────────────┘ │
+│ └────────────────┘ │  │                      │  │                     │
+│                    │  │ ┌──────────────────┐ │  │                     │
+│ ┌────────────────┐ │  │ │ Métricas         │ │  │                     │
+│ │ Métricas       │ │  │ │                  │ │  │                     │
+│ │                │ │  │ │ • Total Updates  │ │  │                     │
+│ │ • Versión      │ │  │ │ • Avg Time       │ │  │                     │
+│ │ • Updates      │ │  │ │ • Skipped        │ │  │                     │
+│ │ • Avg Time     │ │  │ │ • Queue Size     │ │  │                     │
+│ └────────────────┘ │  │ └──────────────────┘ │  │                     │
+└────────────────────┘  └──────────────────────┘  └─────────────────────┘
+         │                       │                          │
+         └───────────────────────┼──────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        COMPONENTES EXISTENTES                            │
+│                                                                          │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐     │
+│  │  InvitationEditor│  │ InvitationPreview│  │ InvitationStorage│     │
+│  │                  │  │                  │  │                  │     │
+│  │  • handleField   │  │  • render()      │  │  • saveData()    │     │
+│  │    Change()      │  │  • update()      │  │  • getData()     │     │
+│  │  • loadData()    │  │  • currentData   │  │  • autoSave      │     │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘     │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+## Flujo de Datos
+
+### 1. Actualización de Campo
+
+```
+┌─────────────┐
+│   Usuario   │
+│  escribe    │
+└──────┬──────┘
+       │
+       ▼
+┌──────────────────────┐
+│  Input Event         │
+│  (input/change)      │
+└──────┬───────────────┘
+       │
+       ▼
+┌──────────────────────┐
+│  Editor              │
+│  handleFieldChange() │
+└──────┬───────────────┘
+       │
+       ▼
+┌──────────────────────┐
+│  State Manager       │
+│  updateField()       │
+│  • Guarda en estado  │
+│  • Agrega a historial│
+│  • Notifica cambios  │
+└──────┬───────────────┘
+       │
+       ├────────────────────┐
+       │                    │
+       ▼                    ▼
+┌──────────────┐    ┌──────────────┐
+│ Preview      │    │  Storage     │
+│ Updater      │    │  Auto-save   │
+│              │    │              │
+│ • Debounce   │    │ • Debounce   │
+│ • Queue      │    │   (1000ms)   │
+│ • Render     │    │ • localStorage│
+│   (150ms)    │    │              │
+└──────────────┘    └──────────────┘
+```
+
+### 2. Acción en Panel de Capas
+
+```
+┌─────────────┐
+│   Usuario   │
+│ hace clic   │
+│ en botón    │
+└──────┬──────┘
+       │
+       ▼
+┌──────────────────────┐
+│  Layer Sync          │
+│  handleLayerAction() │
+│  • toggle-visibility │
+│  • duplicate         │
+│  • delete            │
+│  • etc.              │
+└──────┬───────────────┘
+       │
+       ▼
+┌──────────────────────┐
+│  State Manager       │
+│  updateLayer()       │
+│  • Actualiza estado  │
+│  • Notifica cambios  │
+└──────┬───────────────┘
+       │
+       ├────────────────────┐
+       │                    │
+       ▼                    ▼
+┌──────────────┐    ┌──────────────┐
+│  Layer Sync  │    │  Preview     │
+│  syncToUI()  │    │  Updater     │
+│              │    │              │
+│ • Actualiza  │    │ • Re-render  │
+│   elementos  │    │   si afecta  │
+│   DOM        │    │   visual     │
+│ • Animación  │    │              │
+└──────────────┘    └──────────────┘
+```
+
+### 3. Undo/Redo
+
+```
+┌─────────────┐
+│   Usuario   │
+│  Ctrl+Z     │
+└──────┬──────┘
+       │
+       ▼
+┌──────────────────────┐
+│  Integration         │
+│  undo()              │
+└──────┬───────────────┘
+       │
+       ▼
+┌──────────────────────┐
+│  State Manager       │
+│  undo()              │
+│  • Pop from past     │
+│  • Push to future    │
+│  • Actualiza estado  │
+│  • Notifica UNDO     │
+└──────┬───────────────┘
+       │
+       ├────────────────────┬────────────────┐
+       │                    │                │
+       ▼                    ▼                ▼
+┌──────────────┐    ┌──────────────┐  ┌──────────┐
+│  Editor      │    │  Preview     │  │  Layer   │
+│  loadData()  │    │  Updater     │  │  Sync    │
+│              │    │  forceUpdate()│  │  sync()  │
+│ • Actualiza  │    │              │  │          │
+│   formularios│    │ • Re-render  │  │ • Update │
+│              │    │   inmediato  │  │   UI     │
+└──────────────┘    └──────────────┘  └──────────┘
+```
+
+## Patrón de Comunicación
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    PATRÓN OBSERVER/PUB-SUB                   │
+│                                                              │
+│  ┌──────────────┐                                           │
+│  │   Publisher  │                                           │
+│  │ State Manager│                                           │
+│  │              │                                           │
+│  │  notify()    │───┐                                       │
+│  └──────────────┘   │                                       │
+│                     │                                       │
+│                     ├──────────────┬──────────────┐         │
+│                     │              │              │         │
+│                     ▼              ▼              ▼         │
+│              ┌────────────┐ ┌────────────┐ ┌────────────┐  │
+│              │Subscriber 1│ │Subscriber 2│ │Subscriber 3│  │
+│              │  Preview   │ │   Layers   │ │  Storage   │  │
+│              │  Updater   │ │    Sync    │ │   Save     │  │
+│              │            │ │            │ │            │  │
+│              │ callback() │ │ callback() │ │ callback() │  │
+│              └────────────┘ └────────────┘ └────────────┘  │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## Optimizaciones de Rendimiento
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    DEBOUNCING INTELIGENTE                    │
+│                                                              │
+│  Cambio 1 ──┐                                               │
+│  Cambio 2 ──┼──┐                                            │
+│  Cambio 3 ──┼──┼──┐                                         │
+│  Cambio 4 ──┼──┼──┼──┐                                      │
+│  Cambio 5 ──┼──┼──┼──┼──┐                                   │
+│             │  │  │  │  │                                   │
+│             ▼  ▼  ▼  ▼  ▼                                   │
+│         ┌────────────────────┐                              │
+│         │   Debounce Timer   │                              │
+│         │   (150ms default)  │                              │
+│         └─────────┬──────────┘                              │
+│                   │                                          │
+│                   ▼                                          │
+│         ┌────────────────────┐                              │
+│         │  Solo 1 Update     │                              │
+│         │  (último valor)    │                              │
+│         └────────────────────┘                              │
+│                                                              │
+│  Resultado: 5 cambios → 1 renderizado                       │
+└──────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                      BATCH UPDATES                           │
+│                                                              │
+│  stateManager.batch(() => {                                 │
+│      updateField('field1', 'value1');  ──┐                  │
+│      updateField('field2', 'value2');  ──┼──┐               │
+│      updateField('field3', 'value3');  ──┼──┼──┐            │
+│  });                                     │  │  │            │
+│                                          ▼  ▼  ▼            │
+│                                    ┌──────────────┐         │
+│                                    │ Batch Queue  │         │
+│                                    └──────┬───────┘         │
+│                                           │                 │
+│                                           ▼                 │
+│                                    ┌──────────────┐         │
+│                                    │ 1 Notificación│        │
+│                                    │ al finalizar │         │
+│                                    └──────────────┘         │
+│                                                              │
+│  Resultado: 3 cambios → 1 notificación → 1 renderizado     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## Manejo de Errores
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    ERROR HANDLING FLOW                       │
+│                                                              │
+│  ┌──────────────┐                                           │
+│  │  Operación   │                                           │
+│  │  (cualquiera)│                                           │
+│  └──────┬───────┘                                           │
+│         │                                                    │
+│         ▼                                                    │
+│  ┌──────────────┐                                           │
+│  │  try {       │                                           │
+│  │    execute() │                                           │
+│  │  }           │                                           │
+│  └──────┬───────┘                                           │
+│         │                                                    │
+│    ┌────┴────┐                                              │
+│    │         │                                              │
+│ Success   Error                                             │
+│    │         │                                              │
+│    ▼         ▼                                              │
+│  Return  ┌──────────────┐                                   │
+│  Result  │  catch(err)  │                                   │
+│          └──────┬───────┘                                   │
+│                 │                                            │
+│                 ├─────────────┬─────────────┐               │
+│                 │             │             │               │
+│                 ▼             ▼             ▼               │
+│          ┌──────────┐  ┌──────────┐  ┌──────────┐          │
+│          │  Log     │  │  Notify  │  │  Metrics │          │
+│          │  Error   │  │  User    │  │  Update  │          │
+│          └──────────┘  └──────────┘  └──────────┘          │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+**Leyenda:**
+- `┌─┐` = Componente/Módulo
+- `│ │` = Contenedor
+- `─►` = Flujo de datos
+- `├─┤` = Bifurcación
+- `▼`   = Dirección del flujo
